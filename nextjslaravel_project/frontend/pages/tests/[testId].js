@@ -131,16 +131,29 @@ const TestTake = () => {
         setAttemptId(res.data.attempt_id);
         setTestStarted(true);
         setStartedAt(res.data.started_at);
-        // Ambil started_at dan last_question_id dari response
+        // Ambil started_at, last_question_id, dan last_question_index dari response
         const startedAt = res.data.started_at;
         const lastQuestionId = res.data.last_question_id;
+        const lastQuestionIndex = res.data.last_question_index;
         // Ambil data soal
-        api.get(`/tests/${testId}/questions`)
+        api.get(`/tests/${testId}/questions`, { params: { attempt_id: res.data.attempt_id } })
           .then(resQ => {
             setQuestions(resQ.data);
-            setAnswers(Array(resQ.data.length).fill(''));
-            // Jika resume, set current ke index last_question_id
-            if (lastQuestionId) {
+            // Fetch answers for this attempt
+            api.get(`/tests/${testId}/answers`, { params: { attempt_id: res.data.attempt_id } })
+              .then(resA => {
+                // resA.data = {question_id: answer, ...}
+                const answerMap = resA.data || {};
+                setAnswers(resQ.data.map(q => answerMap[q.id] || ''));
+              })
+              .catch(() => {
+                // fallback: kosongkan jika gagal
+                setAnswers(Array(resQ.data.length).fill(''));
+              });
+            // Jika resume, set current ke index last_question_index (atau last_question_id)
+            if (typeof lastQuestionIndex === 'number' && lastQuestionIndex >= 0 && lastQuestionIndex < resQ.data.length) {
+              setCurrent(lastQuestionIndex);
+            } else if (lastQuestionId) {
               const idx = resQ.data.findIndex(q => q.id === lastQuestionId);
               if (idx >= 0) setCurrent(idx);
             }
@@ -189,12 +202,12 @@ const TestTake = () => {
   // Auto-save answer
   const autoSaveAnswer = async (questionId, answer) => {
     if (!attemptId) return;
-    
     try {
       await api.post(`/tests/${testId}/auto-save`, {
         attempt_id: attemptId,
         question_id: questionId,
-        answer: answer
+        answer: answer,
+        question_index: current
       });
     } catch (err) {
       console.error('Auto-save failed:', err.response?.data || err.message);

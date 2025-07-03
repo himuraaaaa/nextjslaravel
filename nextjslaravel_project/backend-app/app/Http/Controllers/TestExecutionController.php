@@ -50,7 +50,7 @@ class TestExecutionController extends Controller
     /**
      * Get test questions
      */
-    public function testQuestions(Test $test)
+    public function testQuestions(Request $request, Test $test)
     {
         if (!$test->isActive()) {
             throw ValidationException::withMessages([
@@ -58,7 +58,29 @@ class TestExecutionController extends Controller
             ]);
         }
 
-        // Shuffle questions randomly
+        $attemptId = $request->input('attempt_id');
+        if ($attemptId) {
+            $attempt = \App\Models\TestAttempt::where('id', $attemptId)
+                ->where('test_id', $test->id)
+                ->first();
+            if ($attempt && is_array($attempt->question_order) && count($attempt->question_order)) {
+                // Ambil soal sesuai urutan question_order
+                $questions = $test->questions()
+                    ->whereIn('id', $attempt->question_order)
+                    ->select('id', 'question_text', 'question_image_url', 'question_type', 'options')
+                    ->get()
+                    ->keyBy('id');
+                // Urutkan sesuai question_order
+                $ordered = [];
+                foreach ($attempt->question_order as $qid) {
+                    if (isset($questions[$qid])) {
+                        $ordered[] = $questions[$qid];
+                    }
+                }
+                return $ordered;
+            }
+        }
+        // Default: random order lama
         return $test->questions()
             ->inRandomOrder()
             ->select('id', 'question_text', 'question_image_url', 'question_type', 'options')
@@ -156,13 +178,18 @@ class TestExecutionController extends Controller
             ->forTest($test->id)
             ->count() + 1;
 
+        // Random urutan soal dan simpan ke question_order
+        $questionIds = $test->questions()->pluck('id')->toArray();
+        shuffle($questionIds);
+
         $testAttempt = TestAttempt::create([
             'user_id' => $user->id,
-        'test_id' => $test->id,
+            'test_id' => $test->id,
             'attempt_number' => $attemptNumber,
             'status' => 'started',
             'score' => 0,
             'started_at' => now(),
+            'question_order' => $questionIds,
         ]);
 
         return response()->json([
@@ -181,7 +208,8 @@ class TestExecutionController extends Controller
         $request->validate([
             'attempt_id' => 'required|integer|exists:test_attempts,id',
             'question_id' => 'required|integer|exists:questions,id',
-            'answer' => 'nullable|string'
+            'answer' => 'nullable|string',
+            'question_index' => 'nullable|integer',
         ]);
 
         $user = Auth::user();
@@ -210,8 +238,11 @@ class TestExecutionController extends Controller
             ]
         );
 
-        // Update last_question_id di test_attempts
+        // Update last_question_id dan last_question_index di test_attempts
         $testAttempt->last_question_id = $question->id;
+        if ($request->has('question_index')) {
+            $testAttempt->last_question_index = $request->question_index;
+        }
         $testAttempt->save();
 
         return response()->json([
@@ -400,6 +431,27 @@ class TestExecutionController extends Controller
             ->firstOrFail();
 
         return response()->json($attempt);
+    }
+
+    /**
+     * Get all answers for a test attempt (for resume)
+     */
+    public function answersForAttempt(Request $request, Test $test)
+    {
+        $request->validate([
+            'attempt_id' => 'required|integer|exists:test_attempts,id',
+        ]);
+        $user = Auth::user();
+        $attempt = TestAttempt::where('id', $request->attempt_id)
+            ->where('user_id', $user->id)
+            ->where('test_id', $test->id)
+            ->firstOrFail();
+        $answers = $attempt->testAnswers()->get(['question_id', 'answer']);
+        $result = [];
+        foreach ($answers as $ans) {
+            $result[$ans->question_id] = $ans->answer;
+        }
+        return response()->json($result);
     }
 }
 

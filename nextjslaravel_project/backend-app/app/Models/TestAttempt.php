@@ -26,6 +26,16 @@ class TestAttempt extends Model
         'completed_at' => 'datetime',
     ];
 
+    // Accessor & Mutator for question_order
+    public function getQuestionOrderAttribute($value)
+    {
+        return $value ? json_decode($value, true) : [];
+    }
+    public function setQuestionOrderAttribute($value)
+    {
+        $this->attributes['question_order'] = is_array($value) ? json_encode($value) : $value;
+    }
+
     // Relationships
     public function user()
     {

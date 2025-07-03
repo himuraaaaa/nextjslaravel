@@ -83,5 +83,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/test-history', [TestExecutionController::class, 'testHistory']);
     Route::get('/attempt-result/{attemptId}', [TestExecutionController::class, 'attemptResult']);
+    Route::get('/tests/{test}/answers', [TestExecutionController::class, 'answersForAttempt']);
 });
 
