@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import api from '@/utils/api';
 import { useAdminTests } from '@/hooks/useAdminTests';
+import AdminCameraMonitor from '@/components/AdminCameraMonitor';
 
 export default function AdminTestReview() {
   const router = useRouter();
@@ -36,6 +37,10 @@ export default function AdminTestReview() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4 text-black">Review Soal Test</h1>
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold mb-2 text-black">Live Camera Monitoring</h2>
+        <AdminCameraMonitor />
+      </div>
       <div className="mb-4">
         <label className="block mb-2 font-medium text-black">Pilih Test:</label>
         <select

@@ -18,6 +18,14 @@ const Dashboard = () => {
   const [codeError, setCodeError] = useState('');
   const [validatingCode, setValidatingCode] = useState(false);
 
+  // Tambahan: Redirect ke dashboard admin jika user adalah admin
+  if (user && user.role === 'admin') {
+    if (typeof window !== 'undefined') {
+      router.push('/admin'); // Ganti sesuai URL dashboard admin jika berbeda
+    }
+    return null;
+  }
+
   const handleDelete = async (testId) => {
     if (window.confirm('Are you sure you want to delete this test?')) {
       try {

@@ -52,6 +52,7 @@ const Navbar = () => {
                 <Link href="/admin/test-results" className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${router.pathname === '/admin/test-results' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`}><BarChart3 className="h-4 w-4" /><span>Results</span></Link>
                 <Link href="/admin/user_list" className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${router.pathname === '/admin/user_list' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`}><Users className="h-4 w-4" /><span>Users</span></Link>
                 <Link href="/admin/user-attempts" className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${router.pathname === '/admin/user-attempts' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`}><RefreshCw className="h-4 w-4" /><span>Attempts</span></Link>
+                <Link href="/admin/review" className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${router.pathname === '/admin/review' ? 'bg-green-100 text-green-700' : 'text-white hover:text-green-200 hover:bg-white hover:bg-opacity-10'}`}><BarChart3 className="h-4 w-4" /><span>Live Monitor</span></Link>
               </>
             )}
           </div>
@@ -105,6 +106,7 @@ const Navbar = () => {
                 <Link href="/admin/test-results" className={`block px-3 py-2 rounded-md text-base font-medium ${router.pathname === '/admin/test-results' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`} onClick={() => setMobileMenuOpen(false)}>Results</Link>
                 <Link href="/admin/user_list" className={`block px-3 py-2 rounded-md text-base font-medium ${router.pathname === '/admin/user_list' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`} onClick={() => setMobileMenuOpen(false)}>Users</Link>
                 <Link href="/admin/user-attempts" className={`block px-3 py-2 rounded-md text-base font-medium ${router.pathname === '/admin/user-attempts' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`} onClick={() => setMobileMenuOpen(false)}>Attempts</Link>
+                <Link href="/admin/review" className={`block px-3 py-2 rounded-md text-base font-medium ${router.pathname === '/admin/review' ? 'bg-green-100 text-green-700' : 'text-white hover:text-green-200 hover:bg-white hover:bg-opacity-10'}`} onClick={() => setMobileMenuOpen(false)}>Live Monitor</Link>
               </>
             )}
             <div className="border-t mt-2 pt-2 flex items-center space-x-2 px-3">
