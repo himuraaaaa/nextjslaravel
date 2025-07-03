@@ -147,7 +147,8 @@ class TestExecutionController extends Controller
             return response()->json([
                 'message' => 'Test attempt already in progress.',
                 'attempt_id' => $ongoingAttempt->id,
-                'started_at' => $ongoingAttempt->started_at
+                'started_at' => $ongoingAttempt->started_at,
+                'last_question_id' => $ongoingAttempt->last_question_id,
             ]);
         }
 
@@ -208,6 +209,10 @@ class TestExecutionController extends Controller
                 'is_correct' => $question->checkAnswer($request->answer)
             ]
         );
+
+        // Update last_question_id di test_attempts
+        $testAttempt->last_question_id = $question->id;
+        $testAttempt->save();
 
         return response()->json([
             'message' => 'Answer saved successfully.',

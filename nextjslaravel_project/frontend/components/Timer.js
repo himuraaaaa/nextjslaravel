@@ -1,38 +1,35 @@
 import { useState, useEffect, useRef } from 'react';
 import { Clock, AlertTriangle } from 'lucide-react';
 
-const Timer = ({ initialTime, onTimeUp, onTick }) => {
-  const [timeLeft, setTimeLeft] = useState(initialTime);
+const Timer = ({ startedAt, duration, onTimeUp, onTick }) => {
+  const [timeLeft, setTimeLeft] = useState(0);
   const timeUpCalled = useRef(false);
 
   useEffect(() => {
-    setTimeLeft(initialTime);
+    if (!startedAt || !duration) return;
+    const calcTimeLeft = () => {
+      const end = new Date(startedAt).getTime() + duration * 60 * 1000;
+      const now = Date.now();
+      return Math.max(0, Math.floor((end - now) / 1000));
+    };
+    setTimeLeft(calcTimeLeft());
     timeUpCalled.current = false;
-  }, [initialTime]);
-
-  useEffect(() => {
-    if (timeLeft <= 0 && !timeUpCalled.current) {
-      timeUpCalled.current = true;
-      onTimeUp();
-      return;
-    }
-
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        const newTime = prev - 1;
-        onTick(newTime);
-        return newTime;
-      });
+      const left = calcTimeLeft();
+      setTimeLeft(left);
+      onTick(left);
+      if (left <= 0 && !timeUpCalled.current) {
+        timeUpCalled.current = true;
+        onTimeUp();
+      }
     }, 1000);
-
     return () => clearInterval(timer);
-  }, [timeLeft, onTimeUp, onTick]);
+  }, [startedAt, duration, onTimeUp, onTick]);
 
   const formatTime = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
     if (hrs > 0) {
       return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
