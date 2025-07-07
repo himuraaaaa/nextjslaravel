@@ -2,21 +2,19 @@ import React, { useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
 const SIGNALING_SERVER_URL = 'http://localhost:3001';
+const SNAPSHOT_INTERVAL_MS = 3 * 60 * 1000; // 3 menit
 
-const UserCameraStream = ({ userId }) => {
+function UserCameraStream({ attemptId, questionIndex, questionId, userAnswer, ...props }) {
   const videoRef = useRef();
   const socketRef = useRef();
   const peerConnections = useRef({});
+  const snapshotIntervalRef = useRef();
 
   useEffect(() => {
     let localStream;
     socketRef.current = io(SIGNALING_SERVER_URL);
-    socketRef.current.emit('join', { userId, role: 'user' });
-
-    // Minta daftar user online saat user join
+    socketRef.current.emit('join', { userId: props.userId, role: 'user' });
     socketRef.current.emit('get-online-users');
-
-    // Terima daftar user online
     socketRef.current.on('online-users', (users) => {
       Object.entries(users).forEach(([socketId, { userId: adminId, role }]) => {
         if (role === 'admin') {
@@ -27,11 +25,12 @@ const UserCameraStream = ({ userId }) => {
       });
     });
 
-    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-      .then(stream => {
-        localStream = stream;
-        if (videoRef.current) videoRef.current.srcObject = stream;
-      });
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(s => {
+      localStream = s;
+      if (videoRef.current) {
+        videoRef.current.srcObject = localStream;
+      }
+    });
 
     socketRef.current.on('user-joined', ({ userId: adminId, socketId, role }) => {
       if (role === 'admin') {
@@ -54,12 +53,64 @@ const UserCameraStream = ({ userId }) => {
       }
     });
 
+    // Mulai interval snapshot
+    snapshotIntervalRef.current = setInterval(() => {
+      handleSnapshot();
+    }, SNAPSHOT_INTERVAL_MS);
+
     return () => {
       Object.values(peerConnections.current).forEach(pc => pc.close());
       socketRef.current.disconnect();
-      if (localStream) localStream.getTracks().forEach(track => track.stop());
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+      if (snapshotIntervalRef.current) {
+        clearInterval(snapshotIntervalRef.current);
+      }
     };
     // eslint-disable-next-line
+  }, [attemptId, questionIndex, questionId, userAnswer]);
+
+  useEffect(() => {
+    if (!socketRef.current) return;
+    // Listen mute/unmute event dari admin
+    socketRef.current.on('mute', () => {
+      console.log('[SOCKET] Mute event diterima');
+      if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject.getAudioTracks().forEach(track => {
+          track.enabled = false;
+        });
+      }
+      // Pastikan semua peer connection juga mute
+      Object.values(peerConnections.current).forEach(pc => {
+        pc.getSenders().forEach(sender => {
+          if (sender.track && sender.track.kind === 'audio') {
+            sender.track.enabled = false;
+          }
+        });
+      });
+    });
+    socketRef.current.on('unmute', () => {
+      console.log('[SOCKET] Unmute event diterima');
+      if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject.getAudioTracks().forEach(track => {
+          track.enabled = true;
+        });
+      }
+      // Pastikan semua peer connection juga unmute
+      Object.values(peerConnections.current).forEach(pc => {
+        pc.getSenders().forEach(sender => {
+          if (sender.track && sender.track.kind === 'audio') {
+            sender.track.enabled = true;
+          }
+        });
+      });
+    });
+    // Cleanup
+    return () => {
+      socketRef.current.off('mute');
+      socketRef.current.off('unmute');
+    };
   }, []);
 
   function createPeerConnection(socketId, localStream) {
@@ -81,6 +132,52 @@ const UserCameraStream = ({ userId }) => {
     return pc;
   }
 
+  // Ambil snapshot dari video webcam dan upload ke backend
+  const handleSnapshot = async () => {
+    if (!videoRef.current || !attemptId) return;
+    try {
+      // Buat canvas sementara
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth || 320;
+      canvas.height = videoRef.current.videoHeight || 240;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/png');
+      console.log('[SNAPSHOT] Snapshot diambil', {
+        attemptId,
+        questionIndex,
+        questionId,
+        userAnswer,
+        time: new Date().toISOString()
+      });
+      // Kirim ke backend
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const response = await fetch('http://localhost:8000/api/upload-snapshot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify({
+          image: dataUrl,
+          attempt_id: attemptId,
+          question_index: questionIndex,
+          question_id: questionId,
+          user_answer: userAnswer
+        })
+      });
+      if (response.ok) {
+        const res = await response.json();
+        console.log('[SNAPSHOT] Upload berhasil', res);
+      } else {
+        const errRes = await response.text();
+        console.error('[SNAPSHOT] Upload gagal', errRes);
+      }
+    } catch (err) {
+      console.error('[SNAPSHOT] Upload error', err);
+    }
+  };
+
   return (
     <div style={{ position: 'fixed', bottom: 20, right: 20, width: 180, height: 135, background: '#222', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <video
@@ -89,9 +186,10 @@ const UserCameraStream = ({ userId }) => {
         muted
         playsInline
         style={{ width: '100%', height: '100%', borderRadius: 8, objectFit: 'cover' }}
+        {...props}
       />
     </div>
   );
-};
+}
 
 export default UserCameraStream; 

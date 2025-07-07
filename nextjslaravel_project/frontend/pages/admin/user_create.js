@@ -10,6 +10,9 @@ export default function UserCreate() {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
+  const [position_applied, setPositionApplied] = useState('');
+  const [schedule_date, setScheduleDate] = useState('');
+  const [schedule_time, setScheduleTime] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -17,9 +20,9 @@ export default function UserCreate() {
     setSaving(true);
     setMessage('');
     try {
-      await api.post('/admin/users', { name, email, password });
+      await api.post('/admin/users', { name, email, password, position_applied, schedule_date, schedule_time });
       setSuccess('User berhasil dibuat. Email verifikasi telah dikirim ke user.');
-      setName(''); setEmail(''); setPassword('');
+      setName(''); setEmail(''); setPassword(''); setPositionApplied(''); setScheduleDate(''); setScheduleTime('');
       setTimeout(() => router.push('/admin/user_list'), 1500);
     } catch (err) {
       setMessage(err.response?.data?.message || 'Gagal membuat user');
@@ -58,6 +61,18 @@ export default function UserCreate() {
           <div>
             <label className="block text-sm font-medium mb-1 text-black">Password</label>
             <input type="password" className="w-full border border-gray-300 rounded px-3 py-2 text-black" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-black">Posisi yang Dilamar</label>
+            <input type="text" className="w-full border border-gray-300 rounded px-3 py-2 text-black" value={position_applied} onChange={e => setPositionApplied(e.target.value)} required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-black">Hari/Tanggal Assessment</label>
+            <input type="date" className="w-full border border-gray-300 rounded px-3 py-2 text-black" value={schedule_date} onChange={e => setScheduleDate(e.target.value)} required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-black">Waktu Assessment</label>
+            <input type="time" className="w-full border border-gray-300 rounded px-3 py-2 text-black" value={schedule_time} onChange={e => setScheduleTime(e.target.value)} required />
           </div>
           <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Menyimpan...' : 'Simpan User'}</button>
           {message && <div className={`mt-2 ${message.includes('berhasil') ? 'text-green-600' : 'text-red-600'}`}>{message}</div>}

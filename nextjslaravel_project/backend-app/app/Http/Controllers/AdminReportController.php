@@ -469,4 +469,40 @@ class AdminReportController extends Controller
             'extra_attempts_given' => $request->extra_attempts
         ]);
     }
+
+    public function getUserSnapshots($userId)
+    {
+        $user = \App\Models\User::findOrFail($userId);
+        // Ambil semua snapshot milik user (dari semua attempt)
+        $snapshots = \App\Models\TestSnapshot::whereHas('testAttempt', function($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })
+        ->with(['testAttempt.test'])
+        ->orderBy('taken_at', 'desc')
+        ->get();
+
+        // Format snapshot agar ada test_id dan test_title
+        $snapshotsArr = $snapshots->map(function($snap) {
+            return [
+                'id' => $snap->id,
+                'test_id' => $snap->testAttempt->test->id ?? null,
+                'test_title' => $snap->testAttempt->test->title ?? '-',
+                'image_url' => $snap->image_url,
+                'taken_at' => $snap->taken_at,
+            ];
+        });
+
+        // Daftar test unik
+        $tests = $snapshots->pluck('testAttempt.test')->unique('id')->filter()->map(function($test) {
+            return [
+                'id' => $test->id,
+                'title' => $test->title
+            ];
+        })->values();
+
+        return response()->json([
+            'snapshots' => $snapshotsArr,
+            'tests' => $tests
+        ]);
+    }
 } 

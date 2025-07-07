@@ -52,6 +52,11 @@ class TestAttempt extends Model
         return $this->hasMany(TestAnswer::class, 'attempt_id');
     }
 
+    public function snapshots()
+    {
+        return $this->hasMany(TestSnapshot::class);
+    }
+
     // Scopes
     public function scopeStarted($query)
     {

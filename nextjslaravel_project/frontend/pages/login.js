@@ -15,6 +15,7 @@ const Login = () => {
   const recaptchaRef = useRef(null);
   const { login, user } = useAuth();
   const router = useRouter();
+  const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -26,12 +27,32 @@ const Login = () => {
     }
   }, [user, router]);
 
+  const validateEmail = (email) => {
+    // Simple email regex
+    return /^\S+@\S+\.\S+$/.test(email);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    // Validasi manual
+    if (!email && !password) {
+      setModalMessage('Harap isi form login');
+      setLoading(false);
+      return;
+    }
+    if (!email || !validateEmail(email)) {
+      setModalMessage('Email tidak valid');
+      setLoading(false);
+      return;
+    }
+    if (!password || password.length < 6) {
+      setModalMessage('Password tidak valid');
+      setLoading(false);
+      return;
+    }
     if (!recaptchaToken) {
-      setError("Silakan selesaikan reCAPTCHA.");
+      setModalMessage('Harap verifikasi Captcha');
       setLoading(false);
       return;
     }
@@ -43,16 +64,27 @@ const Login = () => {
         router.push('/dashboard');
       }
     } catch (err) {
-      setError(err.message || 'Failed to login. Please check your credentials.');
+      // Jika error dari backend (email/password salah/tidak terdaftar)
+      setModalMessage('Email atau Password tidak valid/tidak terdaftar');
       if (recaptchaRef.current) recaptchaRef.current.reset();
       setRecaptchaToken(null);
     } finally {
       setLoading(false);
     }
   };
+  const closeModal = () => setModalMessage('');
 
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(to bottom, #001F5A 0%, #274690 100%)' }}>
+      {/* Modal Pop-up */}
+      {modalMessage && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 32, minWidth: 280, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', textAlign: 'center' }}>
+            <div style={{ fontSize: 18, color: '#001F5A', marginBottom: 16 }}>{modalMessage}</div>
+            <button onClick={closeModal} style={{ background: '#001F5A', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 32px', fontWeight: 'bold', fontSize: 16, cursor: 'pointer' }}>Tutup</button>
+          </div>
+        </div>
+      )}
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm flex flex-col items-center">
         <img src="/logo-login.png" alt="Logo" className="max-w-[120px] mb-4 mx-auto" />
         <h2 className="text-2xl font-semibold tracking-widest text-center text-[#001F5A] mb-6 border-b border-blue-100 pb-2">LOGIN</h2>
@@ -109,9 +141,7 @@ const Login = () => {
           <button type="submit" className="btn-primary w-full" disabled={loading}>{loading ? 'Loading...' : 'Login'}</button>
         </form>
       </div>
-      <div className="absolute bottom-4 left-0 right-0 text-center text-[#001F5A] text-xs opacity-80">
-        KY©copyright 2019
-      </div>
+      {/* Hapus copyright di bawah */}
     </div>
   );
 };

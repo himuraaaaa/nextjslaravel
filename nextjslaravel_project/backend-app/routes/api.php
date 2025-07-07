@@ -8,6 +8,7 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\TestExecutionController;
 use App\Http\Controllers\TestAnswerController;
 use App\Http\Controllers\AdminReportController;
+use App\Http\Controllers\SnapshotController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,6 +72,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/reset-user-attempts', [AdminReportController::class, 'resetUserAttempts']);
     Route::get('/users-attempts-summary', [AdminReportController::class, 'getUsersAttemptsSummary']);
     Route::post('/give-extra-attempts', [AdminReportController::class, 'giveExtraAttempts']);
+    Route::get('/snapshots/{attemptId}', [SnapshotController::class, 'getSnapshots']);
+    Route::get('/user-snapshots/{userId}', [AdminReportController::class, 'getUserSnapshots']);
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -84,5 +87,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/test-history', [TestExecutionController::class, 'testHistory']);
     Route::get('/attempt-result/{attemptId}', [TestExecutionController::class, 'attemptResult']);
     Route::get('/tests/{test}/answers', [TestExecutionController::class, 'answersForAttempt']);
+    Route::post('/upload-snapshot', [SnapshotController::class, 'uploadSnapshot']);
 });
 

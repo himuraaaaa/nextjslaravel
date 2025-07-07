@@ -19,6 +19,16 @@ io.on("connection", (socket) => {
     io.to(to).emit("signal", { from: socket.id, data });
   });
 
+  // Event mute user
+  socket.on("mute-user", ({ to }) => {
+    io.to(to).emit("mute");
+  });
+
+  // Event unmute user
+  socket.on("unmute-user", ({ to }) => {
+    io.to(to).emit("unmute");
+  });
+
   socket.on("disconnect", () => {
     socket.broadcast.emit("user-left", { socketId: socket.id });
     delete users[socket.id];

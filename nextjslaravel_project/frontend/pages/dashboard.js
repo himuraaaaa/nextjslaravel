@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTests } from '@/hooks/useTests';
@@ -17,6 +17,11 @@ const Dashboard = () => {
   const [testCode, setTestCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const [validatingCode, setValidatingCode] = useState(false);
+  const [showAssessmentNote, setShowAssessmentNote] = useState(true);
+
+  useEffect(() => {
+    setShowAssessmentNote(true);
+  }, []);
 
   // Tambahan: Redirect ke dashboard admin jika user adalah admin
   if (user && user.role === 'admin') {
@@ -95,6 +100,46 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
+      {/* Pop up Assessment Note */}
+      {showAssessmentNote && (
+        <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.35)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div style={{background:'#fff',borderRadius:16,padding:32,maxWidth:600,width:'90%',boxShadow:'0 4px 32px rgba(0,0,0,0.18)',textAlign:'left',overflowY:'auto',maxHeight:'90vh'}}>
+            <div style={{fontWeight:'bold',fontSize:20,color:'#001F5A',marginBottom:12}}>During assessment note:</div>
+            <div style={{fontWeight:'bold',fontSize:16,marginBottom:8,color:'#001F5A'}}>Welcome to Online Assessment PT Kansai Prakarsa Coatings!</div>
+            <div style={{marginBottom:12,color:'#222'}}>Sebelum memulai untuk mengisi, mohon untuk membaca instruksi dan note dengan detail terlebih dahulu.</div>
+            <div style={{fontWeight:'bold',marginBottom:4,color:'#001F5A'}}>Instruksi:</div>
+            <ul style={{marginLeft:18,marginBottom:8,fontSize:15,color:'#222'}}>
+              <li>• Setiap soal terdapat gambar yang kurang lengkap, anda diminta untuk melengkapi gambar mana yang paling cocok untuk menutupi kekurangan tersebut</li>
+              <li>• Setiap soal terdapat beberapa pilihan jawaban</li>
+              <li>• Pilihlah salah satu jawaban yang menurut anda cocok</li>
+            </ul>
+            <div style={{fontWeight:'bold',marginBottom:4,color:'#B9142E'}}>Note:</div>
+            <ul style={{marginLeft:18,marginBottom:16,fontSize:15,color:'#B9142E'}}>
+              <li>• Soal ini akan merekam akses Kamera dan Microphone anda secara live, adanya kecurangan akan terdeteksi</li>
+              <li>• Soal hanya dapat diisi satu kali</li>
+              <li>• Soal ini terdapat durasi waktu terbatas</li>
+              <li>• Dilarang keras untuk menyebar luaskan soal psikotest</li>
+              <li>• Pengisian soal psikotest wajib dikerjakan sendiri tanpa bantuan orang lain</li>
+            </ul>
+            <div style={{fontWeight:'bold',fontSize:16,marginBottom:8,color:'#001F5A'}}>Before you start to fill, kindly read the instructions and notes carefully.</div>
+            <div style={{fontWeight:'bold',marginBottom:4,color:'#001F5A'}}>Instructions:</div>
+            <ul style={{marginLeft:18,marginBottom:8,fontSize:15,color:'#222'}}>
+              <li>• Every question has uncompleted picture, you requested to complete the matched picture</li>
+              <li>• Every question has few answer options</li>
+              <li>• Choose only one matched picture</li>
+            </ul>
+            <div style={{fontWeight:'bold',marginBottom:4,color:'#B9142E'}}>Note:</div>
+            <ul style={{marginLeft:18,marginBottom:24,fontSize:15,color:'#B9142E'}}>
+              <li>• This website will record your Camera and Microphone access live, any fraud will be detected</li>
+              <li>• Assessment only able to be accessed once</li>
+              <li>• Assessment has limited duration</li>
+              <li>• We highly prohibit you to share the assessment</li>
+              <li>• Assessment should be done by yourself without any other people help</li>
+            </ul>
+            <button onClick={()=>setShowAssessmentNote(false)} style={{background:'#001F5A',color:'#fff',border:'none',borderRadius:8,padding:'10px 36px',fontWeight:'bold',fontSize:16,margin:'0 auto',display:'block'}}>Tutup / Close</button>
+          </div>
+        </div>
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
           <Greeting />
@@ -127,64 +172,60 @@ const Dashboard = () => {
             <p className="mt-1 text-sm text-gray-500">Belum ada test yang bisa dikerjakan.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {activeTests.map((test) => (
               <div
                 key={test.id}
-                className={`bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 ${test.remaining_attempts === 0 && test.allowed_attempts > 0 ? 'border-l-4 border-[#B9142E]' : ''}`}
+                className={`relative bg-white rounded-2xl shadow-md transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl border border-transparent ${test.remaining_attempts === 0 && test.allowed_attempts > 0 ? 'border-[#B9142E]' : 'border-gray-200'}`}
+                style={{ minHeight: 270 }}
               >
-                <div className="px-4 py-5 sm:p-6">
-                  <div className="flex items-start justify-between">
-                    <h3 className="text-lg font-medium text-gray-900 truncate flex items-center">
-                      {test.title}
-                      {test.remaining_attempts === 0 && test.allowed_attempts > 0 && (
-                        <span className="inline-block px-2 py-1 ml-2 rounded bg-[#B9142E] text-white text-xs font-semibold">Kesempatan Habis</span>
-                      )}
-                    </h3>
-                    {test.code && (
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Key className="h-4 w-4 mr-1" />
-                        <span>Kode Diperlukan</span>
-                      </div>
-                    )}
-                  </div>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {test.description || 'No description provided'}
-                  </p>
-                  <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
-                    <div className="flex items-center">
-                      <Clock className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                      <span>{test.duration} menit</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Repeat className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                      <span>
-                        {test.allowed_attempts > 0
-                          ? `${test.remaining_attempts} kesempatan tersisa`
-                          : 'Kesempatan tak terbatas'}
-                      </span>
-                    </div>
-                  </div>
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 pt-6 pb-2">
+                  <h3 className="text-xl font-bold text-[#001F5A] truncate">
+                    {test.title}
+                  </h3>
                   {test.code && (
-                    <div className="mt-3 p-2 bg-white border border-gray-200 rounded-md">
-                      <div className="flex items-center text-sm text-[#001F5A]">
-                        <Key className="h-4 w-4 mr-1" />
-                        <span>Test ini memerlukan kode untuk diakses</span>
-                      </div>
-                    </div>
+                    <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-[#001F5A] text-xs font-semibold border border-blue-200">
+                      <Key className="h-4 w-4" /> Kode
+                    </span>
                   )}
                 </div>
-                <div className="px-4 py-4 sm:px-6 flex justify-end items-center bg-gray-50">
+                {/* Badge status di bawah judul */}
+                {test.remaining_attempts === 0 && test.allowed_attempts > 0 && (
+                  <div className="px-6 pb-1">
+                    <span className="inline-block px-3 py-1 rounded-full bg-[#B9142E] bg-opacity-90 text-white text-xs font-semibold shadow-sm animate-pulse mb-2" style={{marginBottom:'0.5rem'}}>
+                      Kesempatan Habis
+                    </span>
+                  </div>
+                )}
+                {/* Info */}
+                <div className="px-6 pb-2 flex flex-col gap-2">
+                  <div className="flex items-center gap-4 text-sm text-gray-700 font-medium">
+                    <span className="flex items-center gap-1"><Clock className="h-5 w-5 text-blue-400" /> {test.duration} menit</span>
+                    <span className="flex items-center gap-1"><Repeat className="h-5 w-5 text-blue-400" /> {test.allowed_attempts > 0 ? `${test.remaining_attempts} kesempatan` : 'Tak terbatas'}</span>
+                  </div>
+                  <div className="text-gray-500 text-sm italic mt-1 min-h-[20px]">
+                    {test.description || <span className="opacity-60">No description provided</span>}
+                  </div>
+                </div>
+                {/* Kode diperlukan */}
+                {test.code && (
+                  <div className="mx-6 my-2 p-2 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-2 text-sm text-[#001F5A]">
+                    <Key className="h-4 w-4" /> Test ini memerlukan kode untuk diakses
+                  </div>
+                )}
+                {/* Footer/Aksi */}
+                <div className="px-6 pb-6 pt-2">
                   <button
                     onClick={() => handleStartTest(test)}
                     disabled={test.remaining_attempts === 0 && test.allowed_attempts > 0}
-                    className={`btn-primary inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#001F5A] ${
+                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-base shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#001F5A] ${
                       test.remaining_attempts === 0 && test.allowed_attempts > 0
-                        ? 'opacity-50 cursor-not-allowed'
-                        : ''
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#001F5A] text-white hover:bg-blue-700 active:bg-blue-900'
                     }`}
                   >
-                    <PlayCircle className="h-5 w-5 mr-2" />
+                    <PlayCircle className="h-5 w-5" />
                     {test.remaining_attempts === 0 && test.allowed_attempts > 0
                       ? 'Kesempatan Habis'
                       : test.code 

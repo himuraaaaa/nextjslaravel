@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/utils/api';
@@ -30,6 +30,8 @@ const TestTake = () => {
   const [validatingCode, setValidatingCode] = useState(false);
 
   const [startedAt, setStartedAt] = useState(null);
+
+
 
   // Convert duration from minutes to seconds for timer
   const getInitialTime = () => {
@@ -157,9 +159,9 @@ const TestTake = () => {
               const idx = resQ.data.findIndex(q => q.id === lastQuestionId);
               if (idx >= 0) setCurrent(idx);
             }
-          })
+        })
           .catch(() => setError('Failed to load questions'))
-          .finally(() => setLoading(false));
+        .finally(() => setLoading(false));
         // Timer: hitung sisa waktu dari startedAt
         if (test && startedAt) {
           const elapsed = Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000);
@@ -245,6 +247,7 @@ const TestTake = () => {
         attempt_id: attemptId,
         answers: answerMap 
       });
+      
       
       clearTimerState();
       setSubmitted(true);
@@ -405,6 +408,7 @@ const TestTake = () => {
         attempt_id: attemptId,
         answers: answerMap 
       });
+      
       
       clearTimerState();
       setSubmitted(true);
@@ -594,8 +598,13 @@ const TestTake = () => {
         </div>
       </div>
     </div>
-      {/* Komponen streaming kamera user ke admin */}
-      {user && <UserCameraStream userId={user.email} />}
+    {/* Komponen streaming kamera user ke admin, render hanya sekali selama test berlangsung */}
+    {user && attemptId && (
+      <UserCameraStream
+        userId={user.email}
+        attemptId={attemptId}
+      />
+    )}
     </>
   );
 };

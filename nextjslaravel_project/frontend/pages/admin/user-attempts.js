@@ -210,29 +210,29 @@ export default function UserAttempts() {
                                                 <td className="px-4 py-2 border border-gray-300 text-gray-900">{attempt.started_at ? new Date(attempt.started_at).toLocaleString() : '-'}</td>
                                                 <td className="px-4 py-2 border border-gray-300 text-gray-900">{attempt.completed_at ? new Date(attempt.completed_at).toLocaleString() : '-'}</td>
                                                 <td className="px-4 py-2 border border-gray-300 text-gray-900">
-                                                    <div className="flex flex-wrap gap-2">
-                                                        <button
-                                                            onClick={() => resetUserAttempts('all')}
-                                                            disabled={loading || userAttempts.attempts.length === 0}
-                                                            className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
-                                                        >
-                                                            Reset All
-                                                        </button>
-                                                        <button
-                                                            onClick={() => resetUserAttempts('completed')}
-                                                            disabled={loading || userAttempts.attempts.filter(a => a.status === 'completed').length === 0}
-                                                            className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-orange-700 disabled:opacity-50"
-                                                        >
-                                                            Reset Completed
-                                                        </button>
-                                                        <button
-                                                            onClick={() => resetUserAttempts('ongoing')}
-                                                            disabled={loading || userAttempts.attempts.filter(a => a.status === 'started').length === 0}
-                                                            className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-yellow-700 disabled:opacity-50"
-                                                        >
-                                                            Reset Ongoing
-                                                        </button>
-                                                    </div>
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => resetUserAttempts('all')}
+                                    disabled={loading || userAttempts.attempts.length === 0}
+                                    className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
+                                >
+                                    Reset All
+                                </button>
+                                <button
+                                    onClick={() => resetUserAttempts('completed')}
+                                    disabled={loading || userAttempts.attempts.filter(a => a.status === 'completed').length === 0}
+                                    className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-orange-700 disabled:opacity-50"
+                                >
+                                    Reset Completed
+                                </button>
+                                <button
+                                    onClick={() => resetUserAttempts('ongoing')}
+                                    disabled={loading || userAttempts.attempts.filter(a => a.status === 'started').length === 0}
+                                    className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-yellow-700 disabled:opacity-50"
+                                >
+                                    Reset Ongoing
+                                </button>
+                            </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -240,7 +240,7 @@ export default function UserAttempts() {
                                 </table>
                             </div>
                         )}
-                    </div>
+                        </div>
 
                     {/* Action Buttons */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

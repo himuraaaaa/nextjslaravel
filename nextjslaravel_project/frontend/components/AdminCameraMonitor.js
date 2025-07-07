@@ -6,6 +6,7 @@ const SIGNALING_SERVER_URL = 'http://localhost:3001';
 const AdminCameraMonitor = () => {
   const [peers, setPeers] = useState({}); // { socketId: { stream, userId } }
   const [onlineUsers, setOnlineUsers] = useState({});
+  const [muteStatus, setMuteStatus] = useState({}); // { socketId: true/false }
   const socketRef = useRef();
   const peerConnections = useRef({});
 
@@ -99,9 +100,19 @@ const AdminCameraMonitor = () => {
     return pc;
   }
 
+  function handleMuteToggle(socketId) {
+    const isMuted = muteStatus[socketId];
+    if (isMuted) {
+      socketRef.current.emit('unmute-user', { to: socketId });
+    } else {
+      socketRef.current.emit('mute-user', { to: socketId });
+    }
+    setMuteStatus(prev => ({ ...prev, [socketId]: !isMuted }));
+  }
+
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-      {Object.entries(peers).map(([socketId, { stream }]) => (
+      {Object.entries(peers).map(([socketId, { stream, userId }]) => (
         <div key={socketId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <video
             autoPlay
@@ -112,8 +123,24 @@ const AdminCameraMonitor = () => {
             style={{ width: 240, height: 180, background: '#222', borderRadius: 8 }}
           />
           <div style={{ marginTop: 8, color: '#333', fontSize: 14, wordBreak: 'break-all', textAlign: 'center' }}>
-            {peers[socketId]?.userId || onlineUsers[socketId]?.userId || 'Unknown user'}
+            {userId || onlineUsers[socketId]?.userId || 'Unknown user'}
           </div>
+          <button
+            onClick={() => handleMuteToggle(socketId)}
+            style={{
+              marginTop: 8,
+              padding: '6px 18px',
+              borderRadius: 6,
+              background: muteStatus[socketId] ? '#16a34a' : '#dc2626',
+              color: '#fff',
+              fontWeight: 'bold',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 14
+            }}
+          >
+            {muteStatus[socketId] ? 'Unmute' : 'Mute'}
+          </button>
         </div>
       ))}
       {Object.keys(peers).length === 0 && <div>Tidak ada user online.</div>}

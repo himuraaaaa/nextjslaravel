@@ -2,13 +2,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { LogOut, User, Home, Settings, BarChart3, FileText, Users, Plus, Menu, X, RefreshCw } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Fragment } from 'react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef();
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileRef = useRef();
 
   if (!user) return null;
 
@@ -31,6 +33,24 @@ const Navbar = () => {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [mobileMenuOpen]);
+
+  // Tutup dropdown jika klik di luar
+  useEffect(() => {
+    if (!profileDropdownOpen) return;
+    function handleClick(e) {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [profileDropdownOpen]);
+
+  // Helper untuk inisial nama
+  const getInitials = (name) => {
+    if (!name) return '';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+  };
 
   return (
     <nav className="shadow-md border-b relative z-20" style={{ background: '#001F5A' }}>
@@ -59,22 +79,33 @@ const Navbar = () => {
 
           {/* User Menu - only show on desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <User className="h-5 w-5 text-white" />
-              <span className="text-sm text-white hidden sm:block">{user.name}</span>
+            {/* Profile Badge & Dropdown */}
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={() => setProfileDropdownOpen(v => !v)}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-white text-[#001F5A] font-bold text-lg shadow hover:shadow-lg focus:outline-none border-2 border-blue-200"
+                title={user.name}
+              >
+                {getInitials(user.name)}
+              </button>
+              {profileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-2 z-50 animate-fade-in" style={{minWidth:180, background:'#001F5A'}}>
+                  <div className="px-4 py-2 font-semibold text-base border-b" style={{color:'#fff', borderColor:'rgba(255,255,255,0.2)'}}>{user.name}</div>
               {isAdmin && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white bg-opacity-20 text-white">
-                  Admin
-                </span>
+                    <div className="px-4 py-1 text-xs bg-white text-[#001F5A] rounded-full inline-block mx-4 my-2 font-bold">Admin</div>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 flex items-center gap-2 rounded-md"
+                    style={{color:'#001F5A', background:'#fff', fontWeight:'bold', marginTop:8, transition:'background 0.2s'}}
+                    onMouseOver={e => e.currentTarget.style.background='#e0e7ff'}
+                    onMouseOut={e => e.currentTarget.style.background='#fff'}
+                  >
+                    <LogOut className="h-4 w-4" /> Logout
+                  </button>
+                </div>
               )}
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-1 text-sm text-white hover:text-blue-200 transition-colors"
-            >
-              <LogOut className="h-4 w-4 text-white" />
-              <span className="hidden sm:block">Logout</span>
-            </button>
             {/* Hamburger Button for mobile only */}
             <button
               className="md:hidden ml-2 p-2 rounded hover:bg-blue-900 focus:outline-none"

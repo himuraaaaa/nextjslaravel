@@ -184,7 +184,7 @@ class TestExecutionController extends Controller
 
         $testAttempt = TestAttempt::create([
             'user_id' => $user->id,
-            'test_id' => $test->id,
+        'test_id' => $test->id,
             'attempt_number' => $attemptNumber,
             'status' => 'started',
             'score' => 0,
@@ -453,6 +453,8 @@ class TestExecutionController extends Controller
         }
         return response()->json($result);
     }
+
+
 }
 
 

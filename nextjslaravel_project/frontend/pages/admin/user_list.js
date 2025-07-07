@@ -53,6 +53,7 @@ export default function UserList() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posisi yang Dilamar</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
               </thead>
@@ -62,9 +63,11 @@ export default function UserList() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.role}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.position_applied || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 space-x-2">
                       <Link href={`/admin/user_detail?id=${user.id}`} className="text-blue-600 hover:underline">Detail</Link>
                       <Link href={`/admin/user_edit?id=${user.id}`} className="text-yellow-600 hover:underline">Edit</Link>
+                      <Link href={`/admin/user/${user.id}/snapshots`} className="text-blue-600 hover:underline ml-2">Hasil Snapshot</Link>
                       <button
                         onClick={() => handleDelete(user.id)}
                         className="text-red-600 hover:underline"
