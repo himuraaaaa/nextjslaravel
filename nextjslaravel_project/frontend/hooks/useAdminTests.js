@@ -65,6 +65,27 @@ export const useAdminTests = () => {
     }
   };
 
+  // Bulk delete tests
+  const bulkDeleteTests = async (ids) => {
+    try {
+      await api.post('/admin/tests/bulk-delete', { ids });
+      setTests(prev => prev.filter(test => !ids.includes(test.id)));
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Failed to bulk delete tests');
+    }
+  };
+
+  // Bulk update status
+  const bulkUpdateStatus = async (ids, status) => {
+    try {
+      const response = await api.post('/admin/tests/bulk-update-status', { ids, status });
+      setTests(prev => prev.map(test => ids.includes(test.id) ? { ...test, status } : test));
+      return response.data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Failed to bulk update status');
+    }
+  };
+
   return {
     tests,
     loading,
@@ -73,6 +94,8 @@ export const useAdminTests = () => {
     createTest,
     updateTest,
     deleteTest,
-    getTest
+    getTest,
+    bulkDeleteTests,
+    bulkUpdateStatus,
   };
 };

@@ -6,6 +6,7 @@ import { Clock, FileText, Plus, Trash, Edit, PlayCircle, Repeat, Key, Eye, EyeOf
 import Link from 'next/link';
 import api from '@/utils/api';
 import Greeting from '@/components/Greeting';
+import Head from 'next/head';
 
 const Dashboard = () => {
   const router = useRouter();
@@ -18,6 +19,15 @@ const Dashboard = () => {
   const [codeError, setCodeError] = useState('');
   const [validatingCode, setValidatingCode] = useState(false);
   const [showAssessmentNote, setShowAssessmentNote] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const testsPerPage = 6;
+  // Pastikan activeTests sudah didefinisikan sebelum digunakan
+  // Misal, jika sebelumnya ada:
+  // const activeTests = tests.filter(...);
+  // Maka deklarasikan di sini:
+  const activeTests = tests.filter(test => test.status === 'active');
+  const totalPages = Math.ceil(activeTests.length / testsPerPage);
+  const paginatedTests = activeTests.slice((currentPage - 1) * testsPerPage, currentPage * testsPerPage);
 
   useEffect(() => {
     setShowAssessmentNote(true);
@@ -89,7 +99,7 @@ const Dashboard = () => {
   };
 
   // Filter hanya test yang statusnya 'active'
-  const activeTests = tests.filter(test => test.status === 'active');
+  // const activeTests = tests.filter(test => test.status === 'active'); // Moved outside
 
   if (!user) {
     if (typeof window !== 'undefined') {
@@ -99,22 +109,10 @@ const Dashboard = () => {
   }
 
   return (
-    <div
-      className="min-h-screen bg-gray-100 py-8 relative"
-      style={{
-        backgroundImage: "url('/bg-page1.jpg')",
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'contain',
-        backgroundPosition: 'top right',
-      }}
-    >
-      {/* Overlay putih transparan */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'rgba(255,255,255,0.7)',
-        zIndex: 0
-      }} />
+    <>
+      <Head>
+        <title>Dashboard | Kansai Paint Assessment</title>
+      </Head>
       {/* Konten utama */}
       <div className="relative z-10 pt-24">
         {/* Pop up Assessment Note */}
@@ -156,104 +154,131 @@ const Dashboard = () => {
             </div>
           </div>
         )}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <Greeting />
-          </div>
+        <div className="max-w-7xl mx-auto flex-grow flex flex-col pt-16">
 
-          {error && (
-            <div className="rounded-md bg-red-50 p-4 mb-6">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{error}</h3>
+            {error && (
+              <div className="rounded-md bg-red-50 p-4 mb-6">
+                <div className="flex">
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">{error}</h3>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-indigo-600">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Loading tests...
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-indigo-600">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading tests...
+                </div>
               </div>
-            </div>
-          ) : activeTests.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No active tests</h3>
-              <p className="mt-1 text-sm text-gray-500">Belum ada test yang bisa dikerjakan.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {activeTests.map((test) => (
-                <div
-                  key={test.id}
-                  className={`relative bg-white rounded-2xl shadow-md transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl border border-transparent ${test.remaining_attempts === 0 && test.allowed_attempts > 0 ? 'border-[#B9142E]' : 'border-gray-200'}`}
-                  style={{ minHeight: 270 }}
-                >
-                  {/* Header */}
-                  <div className="flex items-center justify-between px-6 pt-6 pb-2">
-                    <h3 className="text-xl font-bold text-[#001F5A] truncate">
-                      {test.title}
-                    </h3>
-                    {test.code && (
-                      <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-[#001F5A] text-xs font-semibold border border-blue-200">
-                        <Key className="h-4 w-4" /> Kode
-                      </span>
+            ) : activeTests.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No active tests</h3>
+                <p className="mt-1 text-sm text-gray-500">Belum ada test yang bisa dikerjakan.</p>
+              </div>
+            ) : (
+              <>
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {paginatedTests.map((test) => (
+                  <div
+                    key={test.id}
+                    className={`relative bg-white/90 border border-gray-200 rounded-2xl shadow-2xl transition-all duration-200 mb-6 ${test.status === 'active' ? 'hover:scale-[1.03] hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.18)] hover:border-[#001F5A]' : ''}`}
+                    style={{ minHeight: 270 }}
+                  >
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-6 pt-6 pb-2">
+                      <h3 className="text-xl font-bold text-[#001F5A] truncate">
+                        {test.title}
+                      </h3>
+                      {test.code && (
+                        <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-[#001F5A] text-xs font-semibold border border-blue-200">
+                          <Key className="h-4 w-4" /> Kode
+                        </span>
+                      )}
+                    </div>
+                    {/* Badge status di bawah judul */}
+                    {test.remaining_attempts === 0 && test.allowed_attempts > 0 && (
+                      <div className="px-6 pb-1">
+                        <span className="inline-block px-3 py-1 rounded-full bg-[#B9142E] bg-opacity-90 text-white text-xs font-semibold shadow-sm animate-pulse mb-2" style={{marginBottom:'0.5rem'}}>
+                          Kesempatan Habis
+                        </span>
+                      </div>
                     )}
+                    {/* Info */}
+                    <div className="px-6 pb-2 flex flex-col gap-2">
+                      <div className="flex items-center gap-4 text-sm text-gray-700 font-medium">
+                        <span className="flex items-center gap-1"><Clock className="h-5 w-5 text-blue-400" /> {test.duration} menit</span>
+                        <span className="flex items-center gap-1"><Repeat className="h-5 w-5 text-blue-400" /> {test.allowed_attempts > 0 ? `${test.remaining_attempts} kesempatan` : 'Tak terbatas'}</span>
+                      </div>
+                      <div className="text-gray-500 text-sm italic mt-1 min-h-[20px]">
+                        {test.description || <span className="opacity-60">No description provided</span>}
+                      </div>
+                    </div>
+                    {/* Kode diperlukan */}
+                    {test.code && (
+                      <div className="mx-6 my-2 p-2 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-2 text-sm text-[#001F5A]">
+                        <Key className="h-4 w-4" /> Test ini memerlukan kode untuk diakses
+                      </div>
+                    )}
+                    {/* Footer/Aksi */}
+                    <div className="px-6 pb-6 pt-2">
+                      <button
+                        onClick={() => handleStartTest(test)}
+                        disabled={test.remaining_attempts === 0 && test.allowed_attempts > 0}
+                        className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-base shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#001F5A] ${
+                          test.remaining_attempts === 0 && test.allowed_attempts > 0
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'bg-[#001F5A] text-white hover:bg-blue-700 active:bg-blue-900'
+                        }`}
+                      >
+                        <PlayCircle className="h-5 w-5" />
+                        {test.remaining_attempts === 0 && test.allowed_attempts > 0
+                          ? 'Kesempatan Habis'
+                          : test.code 
+                            ? 'Masukkan Kode'
+                            : 'Mulai Test'}
+                      </button>
+                    </div>
                   </div>
-                  {/* Badge status di bawah judul */}
-                  {test.remaining_attempts === 0 && test.allowed_attempts > 0 && (
-                    <div className="px-6 pb-1">
-                      <span className="inline-block px-3 py-1 rounded-full bg-[#B9142E] bg-opacity-90 text-white text-xs font-semibold shadow-sm animate-pulse mb-2" style={{marginBottom:'0.5rem'}}>
-                        Kesempatan Habis
-                      </span>
-                    </div>
-                  )}
-                  {/* Info */}
-                  <div className="px-6 pb-2 flex flex-col gap-2">
-                    <div className="flex items-center gap-4 text-sm text-gray-700 font-medium">
-                      <span className="flex items-center gap-1"><Clock className="h-5 w-5 text-blue-400" /> {test.duration} menit</span>
-                      <span className="flex items-center gap-1"><Repeat className="h-5 w-5 text-blue-400" /> {test.allowed_attempts > 0 ? `${test.remaining_attempts} kesempatan` : 'Tak terbatas'}</span>
-                    </div>
-                    <div className="text-gray-500 text-sm italic mt-1 min-h-[20px]">
-                      {test.description || <span className="opacity-60">No description provided</span>}
-                    </div>
-                  </div>
-                  {/* Kode diperlukan */}
-                  {test.code && (
-                    <div className="mx-6 my-2 p-2 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-2 text-sm text-[#001F5A]">
-                      <Key className="h-4 w-4" /> Test ini memerlukan kode untuk diakses
-                    </div>
-                  )}
-                  {/* Footer/Aksi */}
-                  <div className="px-6 pb-6 pt-2">
+                ))}
+              </div>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-8">
+                  <button
+                    className="px-3 py-1 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 disabled:opacity-50"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Prev
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => (
                     <button
-                      onClick={() => handleStartTest(test)}
-                      disabled={test.remaining_attempts === 0 && test.allowed_attempts > 0}
-                      className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-base shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#001F5A] ${
-                        test.remaining_attempts === 0 && test.allowed_attempts > 0
-                          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                          : 'bg-[#001F5A] text-white hover:bg-blue-700 active:bg-blue-900'
-                      }`}
+                      key={i+1}
+                      className={`px-3 py-1 rounded font-semibold ${currentPage === i+1 ? 'bg-[#001F5A] text-white' : 'bg-gray-100 text-[#001F5A] hover:bg-gray-200'}`}
+                      onClick={() => setCurrentPage(i+1)}
                     >
-                      <PlayCircle className="h-5 w-5" />
-                      {test.remaining_attempts === 0 && test.allowed_attempts > 0
-                        ? 'Kesempatan Habis'
-                        : test.code 
-                          ? 'Masukkan Kode'
-                          : 'Mulai Test'}
+                      {i+1}
                     </button>
-                  </div>
+                  ))}
+                  <button
+                    className="px-3 py-1 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 disabled:opacity-50"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              )}
+              </>
+            )}
+          </div>
 
         {/* Code Input Modal */}
         {showCodeModal && selectedTest && (
@@ -328,7 +353,7 @@ const Dashboard = () => {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

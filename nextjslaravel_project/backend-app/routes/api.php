@@ -45,6 +45,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/tests/{test}', [TestController::class, 'show']);
     Route::put('/tests/{test}', [TestController::class, 'update']);
     Route::delete('/tests/{test}', [TestController::class, 'destroy']);
+    Route::post('/tests/bulk-delete', [TestController::class, 'bulkDelete']);
+    Route::post('/tests/bulk-update-status', [TestController::class, 'bulkUpdateStatus']);
     
     Route::get('/questions', [QuestionController::class, 'index']);
     Route::post('/questions', [QuestionController::class, 'store']);

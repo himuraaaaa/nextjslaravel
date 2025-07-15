@@ -362,25 +362,23 @@ class TestExecutionController extends Controller
             });
 
             // Send email notifications
-            try {
-                // Refresh the test attempt to get latest data
-                $testAttempt->refresh();
-                
-                // Send email to user
-                Mail::to($user->email)->send(new TestCompletionMail($testAttempt));
-
-                // Send email to admin (get admin users)
-                $adminUsers = User::where('role', 'admin')->get();
-                foreach ($adminUsers as $admin) {
-                    Mail::to($admin->email)->send(new AdminTestCompletionMail($testAttempt));
-                }
-            } catch (\Exception $e) {
-                \Log::error('Failed to send email notifications', [
-                    'attempt_id' => $testAttempt->id,
-                    'error' => $e->getMessage()
-                ]);
-                // Don't fail the test submission if email fails
-            }
+            // try {
+            //     // Refresh the test attempt to get latest data
+            //     $testAttempt->refresh();
+            //     // Send email to user
+            //     Mail::to($user->email)->send(new TestCompletionMail($testAttempt));
+            //     // Send email to admin (get admin users)
+            //     $adminUsers = User::where('role', 'admin')->get();
+            //     foreach ($adminUsers as $admin) {
+            //         Mail::to($admin->email)->send(new AdminTestCompletionMail($testAttempt));
+            //     }
+            // } catch (\Exception $e) {
+            //     \Log::error('Failed to send email notifications', [
+            //         'attempt_id' => $testAttempt->id,
+            //         'error' => $e->getMessage()
+            //     ]);
+            //     // Don't fail the test submission if email fails
+            // }
 
             return response()->json([
                 'message' => 'Test submitted successfully.',

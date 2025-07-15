@@ -3,15 +3,45 @@ import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminTests } from '@/hooks/useAdminTests';
 import Link from 'next/link';
-import { Plus, Edit, Eye, Clock, Key, EyeOff, Trash2 } from 'lucide-react';
+import { Plus, Edit, Eye, Clock, Key, EyeOff, Trash2, CheckSquare, Square } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { useState } from 'react';
 
 const TestList = () => {
   const router = useRouter();
   const { user } = useAuth();
-  const { tests, loading, error, fetchTests, deleteTest } = useAdminTests();
+  const { tests, loading, error, fetchTests, deleteTest, bulkDeleteTests, bulkUpdateStatus } = useAdminTests();
   const [showCodes, setShowCodes] = useState({});
+  const [selectedTests, setSelectedTests] = useState([]);
+
+  // Select all handler
+  const allSelected = tests.length > 0 && selectedTests.length === tests.length;
+  const handleSelectAll = () => {
+    if (allSelected) setSelectedTests([]);
+    else setSelectedTests(tests.map(t => t.id));
+  };
+  const handleSelect = (id) => {
+    setSelectedTests(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+  const handleBulkDelete = async () => {
+    if (selectedTests.length === 0) return;
+    if (!window.confirm('Yakin ingin menghapus semua test terpilih?')) return;
+    try {
+      await bulkDeleteTests(selectedTests);
+      setSelectedTests([]);
+    } catch (err) {
+      alert(err.message || 'Gagal menghapus test secara massal');
+    }
+  };
+  const handleBulkStatus = async (status) => {
+    if (selectedTests.length === 0) return;
+    try {
+      await bulkUpdateStatus(selectedTests, status);
+      setSelectedTests([]);
+    } catch (err) {
+      alert(err.message || 'Gagal update status massal');
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -55,12 +85,45 @@ const TestList = () => {
       </PageHeader>
 
       <div className="px-4 sm:px-6 lg:px-8 py-8">
+        {/* Tombol aksi massal */}
+        <div className="mb-4 flex flex-wrap gap-3 items-center">
+          <button
+            onClick={handleBulkDelete}
+            disabled={selectedTests.length === 0}
+            className={`px-4 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed`}
+          >
+            Hapus Terpilih
+          </button>
+          <button
+            onClick={() => handleBulkStatus('active')}
+            disabled={selectedTests.length === 0}
+            className={`px-4 py-2 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed`}
+          >
+            Jadikan Aktif
+          </button>
+          <button
+            onClick={() => handleBulkStatus('draft')}
+            disabled={selectedTests.length === 0}
+            className={`px-4 py-2 rounded-lg font-semibold text-white bg-yellow-600 hover:bg-yellow-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed`}
+          >
+            Jadikan Draft
+          </button>
+          <span className="ml-4 text-sm text-gray-500">{selectedTests.length} test dipilih</span>
+        </div>
         {error && <div className="text-red-600 mb-4">{error}</div>}
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-4 py-3 text-center">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={handleSelectAll}
+                      className="accent-blue-600 h-5 w-5 rounded"
+                    />
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Nama Test
                   </th>
@@ -87,6 +150,14 @@ const TestList = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {tests.map(test => (
                   <tr key={test.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedTests.includes(test.id)}
+                        onChange={() => handleSelect(test.id)}
+                        className="accent-blue-600 h-5 w-5 rounded"
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       <div>
                         <div className="font-medium">{test.title}</div>

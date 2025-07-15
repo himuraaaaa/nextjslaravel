@@ -51,5 +51,38 @@ class TestController extends Controller
         $test->delete();
         return response()->json(['message' => 'Test deleted']);
     }
+
+    // Bulk delete tests
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (!is_array($ids) || empty($ids)) {
+            return response()->json(['message' => 'No IDs provided'], 400);
+        }
+        // Hapus relasi terkait (questions, attempts, answers, snapshots)
+        \App\Models\Test::whereIn('id', $ids)->each(function ($test) {
+            // Hapus semua answers dari semua attempts
+            foreach ($test->testAttempts as $attempt) {
+                $attempt->testAnswers()->delete();
+                $attempt->snapshots()->delete();
+            }
+            $test->testAttempts()->delete();
+            $test->questions()->delete();
+            $test->delete();
+        });
+        return response()->json(['message' => 'Tests deleted']);
+    }
+
+    // Bulk update status
+    public function bulkUpdateStatus(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        $status = $request->input('status');
+        if (!is_array($ids) || empty($ids) || !$status) {
+            return response()->json(['message' => 'IDs and status required'], 400);
+        }
+        \App\Models\Test::whereIn('id', $ids)->update(['status' => $status]);
+        return response()->json(['message' => 'Status updated']);
+    }
 }
 

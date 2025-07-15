@@ -75,7 +75,6 @@ function UserCameraStream({ attemptId, questionIndex, questionId, userAnswer, ..
     if (!socketRef.current) return;
     // Listen mute/unmute event dari admin
     socketRef.current.on('mute', () => {
-      console.log('[SOCKET] Mute event diterima');
       if (videoRef.current && videoRef.current.srcObject) {
         videoRef.current.srcObject.getAudioTracks().forEach(track => {
           track.enabled = false;
@@ -91,7 +90,6 @@ function UserCameraStream({ attemptId, questionIndex, questionId, userAnswer, ..
       });
     });
     socketRef.current.on('unmute', () => {
-      console.log('[SOCKET] Unmute event diterima');
       if (videoRef.current && videoRef.current.srcObject) {
         videoRef.current.srcObject.getAudioTracks().forEach(track => {
           track.enabled = true;
@@ -143,13 +141,6 @@ function UserCameraStream({ attemptId, questionIndex, questionId, userAnswer, ..
       const ctx = canvas.getContext('2d');
       ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
       const dataUrl = canvas.toDataURL('image/png');
-      console.log('[SNAPSHOT] Snapshot diambil', {
-        attemptId,
-        questionIndex,
-        questionId,
-        userAnswer,
-        time: new Date().toISOString()
-      });
       // Kirim ke backend
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await fetch('http://localhost:8000/api/upload-snapshot', {
@@ -168,13 +159,11 @@ function UserCameraStream({ attemptId, questionIndex, questionId, userAnswer, ..
       });
       if (response.ok) {
         const res = await response.json();
-        console.log('[SNAPSHOT] Upload berhasil', res);
       } else {
         const errRes = await response.text();
-        console.error('[SNAPSHOT] Upload gagal', errRes);
       }
     } catch (err) {
-      console.error('[SNAPSHOT] Upload error', err);
+      console.error(err);
     }
   };
 

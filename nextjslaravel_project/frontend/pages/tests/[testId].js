@@ -440,8 +440,8 @@ const TestTake = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center" style={{
-        backgroundImage: "url('/bg-page1.jpg')",
+      <div className="min-h-screen flex items-center justify-center" style={{
+        backgroundImage: "url('/bg-page.png')",
         backgroundRepeat: 'no-repeat',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -466,7 +466,15 @@ const TestTake = () => {
   }
 
   return (
-    <>
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: "url('/bg-page.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
     <div className="max-w-xl mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">{test.title}</h1>
@@ -496,9 +504,13 @@ const TestTake = () => {
         </div>
       )}
       
-      <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-4xl">
-        <div className="mb-8">
-          <p className="text-gray-600 font-medium">SOAL {current + 1} DARI {questions.length}</p>
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-3xl mx-auto flex flex-col md:flex-row gap-8">
+        {/* Section Soal */}
+        <div className="md:w-1/2 flex-1 border-b md:border-b-0 md:border-r border-gray-200 pr-0 md:pr-8 mb-6 md:mb-0">
+          <div className="mb-4 text-gray-700 font-semibold text-sm tracking-wide text-center">
+            SOAL {current + 1} DARI {questions.length}
+            <div className="h-1 w-full bg-[#800000] rounded-full mt-2 mb-4"></div>
+          </div>
           <div className="mt-4 text-xl text-gray-800 leading-relaxed">
             {questions[current].question_text}
           </div>
@@ -515,95 +527,103 @@ const TestTake = () => {
             </div>
           )}
         </div>
-        
-        {q?.question_type === 'multiple_choice' && (
-          <div className="space-y-3">
-            {(Array.isArray(q.options) ? q.options : []).map((option, index) => (
-              <label
-                key={index}
-                className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all ${
-                  answers[current] === String(index)
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-                onClick={() => handleOptionChange(String(index))}
-              >
-              <input
-                type="radio"
-                  name={`question_${q.id}`}
-                  value={String(index)}
-                  checked={answers[current] === String(index)}
-                  readOnly
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-              />
-                <span className="ml-3 text-gray-700">{option.text}</span>
-                {option.image_url && (
-                  <img src={option.image_url} alt="Opsi" className="max-h-16 ml-4 rounded" />
-                )}
-            </label>
-            ))}
-          </div>
-        )}
-        
-        {q?.question_type === 'essay' ? (
-          <textarea
-            className="w-full border rounded px-3 py-2 mt-2 text-gray-900"
-            rows={4}
-            value={answers[current] || ''}
-            onChange={handleChange}
-            placeholder="Tulis jawaban Anda di sini..."
-            disabled={timeUp}
-          />
-        ) : null}
-        
-        {q?.question_type === 'true_false' && (
-          <div className="space-y-3">
-            {['true', 'false'].map((val, idx) => (
-              <label
-                key={val}
-                className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all ${
-                  answers[current] === val
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-                onClick={() => handleOptionChange(val)}
-              >
-                <input
-                  type="radio"
-                  name={`question_${q.id}`}
-                  value={val}
-                  checked={answers[current] === val}
-                  readOnly
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                />
-                <span className="ml-3 text-gray-700">{val === 'true' ? 'Benar' : 'Salah'}</span>
-              </label>
-            ))}
-          </div>
-        )}
-        
-        {error && <div className="text-red-600 mt-4">{error}</div>}
-        
-        <div className="flex justify-between mt-6">
-          {current < questions.length - 1 ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={!answers[current] || timeUp}
-              className="btn-primary text-white px-6 py-2 rounded flex items-center disabled:bg-gray-400"
-            >
-              Next <ChevronRight className="h-4 w-4 ml-2" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={submitting || timeUp}
-              className="btn-primary text-white px-6 py-2 rounded flex items-center disabled:bg-gray-400"
-            >
-              {submitting ? 'Submitting...' : 'Submit'} <Send className="h-4 w-4 ml-2" />
-            </button>
+        {/* Section Jawaban */}
+        <div className="md:w-1/2 flex-1 pl-0 md:pl-8">
+          {q?.question_type === 'multiple_choice' && (
+            <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(Array.isArray(q.options) ? q.options : []).map((option, idx) => {
+                  const isObj = typeof option === 'object' && option !== null;
+                  const text = isObj ? option.text : (typeof option === 'string' ? option : '');
+                  const imageUrl = isObj ? option.image_url : (typeof option === 'string' && option.match(/^https?:\/\//) ? option : null);
+                  return (
+                    <label
+                      key={idx}
+                      className={`flex flex-col items-center justify-center bg-gray-50 rounded-xl border-2 cursor-pointer transition p-2
+                        ${answers[current] === String(idx) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
+                      onClick={() => handleOptionChange(String(idx))}
+                    >
+                      <input
+                        type="radio"
+                        name={`question_${q.id}`}
+                        value={String(idx)}
+                        checked={answers[current] === String(idx)}
+                        readOnly
+                        className="mb-2 accent-blue-600"
+                      />
+                      {imageUrl && (
+                        <img src={imageUrl} alt={`Opsi ${idx + 1}`} className="h-20 w-auto object-contain mx-auto" />
+                      )}
+                      {text && (
+                        <span className="text-gray-800 font-medium text-lg mt-2 text-center">{text}</span>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
           )}
+          
+          {q?.question_type === 'essay' ? (
+            <textarea
+              className="w-full border rounded px-3 py-2 mt-2 text-gray-900"
+              rows={4}
+              value={answers[current] || ''}
+              onChange={handleChange}
+              placeholder="Tulis jawaban Anda di sini..."
+              disabled={timeUp}
+            />
+          ) : null}
+          
+          {q?.question_type === 'true_false' && (
+            <div className="space-y-3">
+              {['true', 'false'].map((val, idx) => (
+                <label
+                  key={val}
+                  className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all ${
+                    answers[current] === val
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  onClick={() => handleOptionChange(val)}
+                >
+                  <input
+                    type="radio"
+                    name={`question_${q.id}`}
+                    value={val}
+                    checked={answers[current] === val}
+                    readOnly
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                  />
+                  <span className="ml-3 text-gray-700">{val === 'true' ? 'Benar' : 'Salah'}</span>
+                </label>
+              ))}
+            </div>
+          )}
+          
+          {error && <div className="text-red-600 mt-4">{error}</div>}
+          
+          <div className="flex justify-between mt-6">
+            {current < questions.length - 1 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={!answers[current] || timeUp}
+                className="btn-primary text-white px-6 py-2 rounded flex items-center disabled:bg-gray-400"
+              >
+                Next <ChevronRight className="h-4 w-4 ml-2" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting || timeUp}
+                className="btn-primary text-white px-6 py-2 rounded flex items-center disabled:bg-gray-400"
+              >
+                {submitting ? 'Submitting...' : 'Submit'} <Send className="h-4 w-4 ml-2" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -614,7 +634,7 @@ const TestTake = () => {
         attemptId={attemptId}
       />
     )}
-    </>
+    </div>
   );
 };
 
