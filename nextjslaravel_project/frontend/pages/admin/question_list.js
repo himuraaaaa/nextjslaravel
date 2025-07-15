@@ -1,16 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminQuestions } from '@/hooks/useAdminQuestions';
 import Link from 'next/link';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
+import api from '@/utils/api';
 
 const QuestionList = () => {
   const router = useRouter();
   const { test_id } = router.query;
   const { user } = useAuth();
   const { questions, loading, error, fetchQuestions, deleteQuestion } = useAdminQuestions();
+  const [testType, setTestType] = useState('general');
+  const [testTitle, setTestTitle] = useState('');
 
   useEffect(() => {
     if (!user) {
@@ -19,6 +22,15 @@ const QuestionList = () => {
       router.push('/dashboard');
     } else if (test_id) {
       fetchQuestions();
+      api.get(`/admin/tests/${test_id}`)
+        .then(res => {
+          setTestType(res.data.type || 'general');
+          setTestTitle(res.data.title || '');
+        })
+        .catch(() => {
+          setTestType('general');
+          setTestTitle('');
+        });
     }
   }, [user, router, test_id]);
 
@@ -41,12 +53,12 @@ const QuestionList = () => {
   return (
     <div className="max-w-7xl mx-auto">
       <PageHeader
-        title={`Daftar Soal Test #${test_id}`}
+        title={testTitle ? `Daftar Soal - ${testTitle}` : 'Daftar Soal'}
         subtitle="Kelola soal-soal untuk test ini"
         backLink="/admin/test_list"
         backText="Kembali ke Daftar Test"
       >
-        <Link href="/admin/question_create" className="btn-primary flex items-center">Tambah Soal</Link>
+        <Link href={`/admin/question_create?test_id=${test_id}`} className="btn-primary flex items-center">Tambah Soal</Link>
       </PageHeader>
 
       <div className="px-4 sm:px-6 lg:px-8 py-8">

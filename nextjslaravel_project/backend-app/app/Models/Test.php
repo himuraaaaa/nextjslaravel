@@ -16,7 +16,8 @@ class Test extends Model
         'allowed_attempts', 
         'code',
         'status',
-        'created_by'
+        'created_by',
+        'type'
     ];
 
     protected $casts = [

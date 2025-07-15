@@ -13,7 +13,7 @@ class TestAnswer extends Model
         'attempt_id',
         'question_id',
         'answer',
-        'is_correct'
+        'is_correct',
     ];
 
     protected $casts = [

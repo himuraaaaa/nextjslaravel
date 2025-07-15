@@ -24,13 +24,20 @@ class QuestionController extends Controller
             'test_id' => 'required|exists:tests,id',
             'question_text' => 'required|string',
             'question_image_url' => 'nullable|string|max:2048',
-            'question_type' => 'required|in:multiple_choice,true_false,essay',
+            'question_type' => 'required|in:multiple_choice,true_false,essay,disc',
             'points' => 'required|integer|min:1',
-            'options' => ['required_if:question_type,multiple_choice', 'array', 'min:2'],
+            'options' => ['required_if:question_type,multiple_choice,disc', 'array', 'min:2'],
             'options.*.text' => ['nullable', 'string'],
             'options.*.image_url' => ['nullable', 'string', 'max:2048'],
             'correct_answer' => ['required_if:question_type,multiple_choice,true_false', 'string'],
         ]);
+        $test = \App\Models\Test::find($data['test_id']);
+        if ($test && $test->type === 'disc' && $data['question_type'] !== 'disc') {
+            return response()->json(['message' => 'Soal untuk tes DISC hanya boleh bertipe disc.'], 422);
+        }
+        if ($test && $test->type !== 'disc' && $data['question_type'] === 'disc') {
+            return response()->json(['message' => 'Soal tipe disc hanya boleh untuk tes DISC.'], 422);
+        }
 
         if ($data['question_type'] === 'multiple_choice') {
             $options = $data['options'];
@@ -54,14 +61,21 @@ class QuestionController extends Controller
         $data = $request->validate([
             'question_text' => 'sometimes|string',
             'question_image_url' => 'nullable|string|max:2048',
-            'question_type' => 'sometimes|in:multiple_choice,true_false,essay',
+            'question_type' => 'sometimes|in:multiple_choice,true_false,essay,disc',
             'points' => 'sometimes|integer|min:1',
-            'options' => ['sometimes', 'required_if:question_type,multiple_choice', 'array', 'min:2'],
+            'options' => ['sometimes', 'required_if:question_type,multiple_choice,disc', 'array', 'min:2'],
             'options.*.text' => ['nullable', 'string'],
             'options.*.image_url' => ['nullable', 'string', 'max:2048'],
             'correct_answer' => ['sometimes', 'required_if:question_type,multiple_choice,true_false', 'string', 'nullable'],
         ]);
+        $test = $question->test;
         $type = $data['question_type'] ?? $question->question_type;
+        if ($test && $test->type === 'disc' && $type !== 'disc') {
+            return response()->json(['message' => 'Soal untuk tes DISC hanya boleh bertipe disc.'], 422);
+        }
+        if ($test && $test->type !== 'disc' && $type === 'disc') {
+            return response()->json(['message' => 'Soal tipe disc hanya boleh untuk tes DISC.'], 422);
+        }
         if ($type === 'multiple_choice') {
             $options = $data['options'] ?? $question->options;
             $correctIndex = isset($data['correct_answer']) ? (int) $data['correct_answer'] : null;

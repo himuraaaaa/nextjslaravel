@@ -41,9 +41,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        \Log::info('NOCAPTCHA_SECRET', ['secret' => config('services.recaptcha.secret')]);
-        \Log::info('NOCAPTCHA_SITEKEY', ['sitekey' => config('services.recaptcha.sitekey')]);
-        \Log::info('TEST_ENV_VAR', ['val' => env('TEST_ENV_VAR')]);
+
 
         $request->validate([
             'email'    => 'required|email',

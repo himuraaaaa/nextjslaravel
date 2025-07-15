@@ -440,18 +440,27 @@ const TestTake = () => {
 
   if (submitted) {
     return (
-      <div className="max-w-xl mx-auto py-12 text-center">
-        <Send className="mx-auto h-12 w-12 text-green-600 mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {timeUp ? 'Waktu habis! Jawaban berhasil dikirim otomatis.' : 'Jawaban berhasil dikirim!'}
-        </h2>
-        <p className="text-gray-700">Terima kasih sudah mengerjakan test.</p>
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="btn-primary text-white px-6 py-2 rounded"
-        >
-          Kembali ke Dashboard
-        </button>
+      <div className="min-h-[60vh] flex items-center justify-center" style={{
+        backgroundImage: "url('/bg-page1.jpg')",
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}>
+        <div className="bg-white shadow-md border border-gray-100 rounded-xl px-8 py-10 flex flex-col items-center max-w-md w-full">
+          <div className="flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 mb-6">
+            <Send className="h-12 w-12 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-blue-900 mb-2 text-center">
+            {timeUp ? 'Waktu habis! Jawaban berhasil dikirim otomatis.' : 'Jawaban berhasil dikirim!'}
+          </h2>
+          <p className="text-gray-600 mb-6 text-center">Terima kasih sudah mengerjakan test.</p>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition"
+          >
+            Kembali ke Dashboard
+          </button>
+        </div>
       </div>
     );
   }

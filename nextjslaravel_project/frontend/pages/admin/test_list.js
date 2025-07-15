@@ -77,6 +77,9 @@ const TestList = () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tipe
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Aksi
                   </th>
                 </tr>
@@ -140,23 +143,30 @@ const TestList = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        test.type === 'general' ? 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        General
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex space-x-3">
                         <Link 
-                          href={`/admin/question_list?test_id=${test.id}`} 
+                          href={`/admin/question_list?test_id=${test.id}`}
                           className="text-blue-600 hover:text-blue-900 font-medium flex items-center"
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           Kelola Soal
                         </Link>
                         <Link 
-                          href={`/admin/review?test_id=${test.id}`} 
+                          href={`/admin/review?test_id=${test.id}`}
                           className="text-purple-600 hover:text-purple-900 font-medium flex items-center"
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           Review Test
                         </Link>
                         <Link 
-                          href={`/admin/test_edit?test_id=${test.id}`} 
+                          href={`/admin/test_edit?test_id=${test.id}`}
                           className="text-green-600 hover:text-green-900 font-medium flex items-center"
                         >
                           <Edit className="h-4 w-4 mr-1" />
@@ -182,4 +192,4 @@ const TestList = () => {
   );
 };
 
-export default TestList; 
+export default TestList;

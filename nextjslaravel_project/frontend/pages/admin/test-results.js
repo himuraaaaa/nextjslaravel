@@ -311,86 +311,61 @@ const TestResults = () => {
 
       {/* Detail Modal */}
       {showDetail && selectedResult && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Detail Hasil Test
-                </h3>
-                <button
-                  onClick={() => setShowDetail(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-gray-900">Informasi Test</h4>
-                  <p className="text-sm text-gray-600">
-                    <strong>User:</strong> {selectedResult.user?.name} ({selectedResult.user?.email})
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Test:</strong> {selectedResult.test?.title}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Attempt:</strong> #{selectedResult.attempt_number}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Score:</strong> {selectedResult.score || 0}%
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Status:</strong> {selectedResult.status}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Started:</strong> {formatDate(selectedResult.started_at)}
-                  </p>
-                  {selectedResult.completed_at && (
-                    <p className="text-sm text-gray-600">
-                      <strong>Completed:</strong> {formatDate(selectedResult.completed_at)}
-                    </p>
-                  )}
-                </div>
-
-                {selectedResult.test_answers && selectedResult.test_answers.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-gray-900">Jawaban Detail</h4>
-                    <div className="space-y-2">
-                      {selectedResult.test_answers.map((answer, index) => (
-                        <div key={answer.id} className="border rounded p-3">
-                          <p className="text-sm font-medium text-gray-900">
-                            Soal {index + 1}: {answer.question?.question_text}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            <strong>Jawaban:</strong> {answer.answer || 'Tidak dijawab'}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            <strong>Status:</strong> 
-                            {answer.is_correct === true ? (
-                              <span className="text-green-600 ml-1">✓ Benar</span>
-                            ) : answer.is_correct === false ? (
-                              <span className="text-red-600 ml-1">✗ Salah</span>
-                            ) : (
-                              <span className="text-gray-600 ml-1">? Perlu penilaian manual</span>
-                            )}
-                          </p>
-                        </div>
-                      ))}
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-white/30 backdrop-blur">
+          <div className="bg-white shadow-lg border border-gray-200 rounded-xl max-w-2xl w-full p-8 relative">
+            <button
+              onClick={() => setShowDetail(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold"
+              aria-label="Tutup"
+            >
+              ×
+            </button>
+            <h2 className="text-2xl font-bold text-blue-900 mb-2">Detail Hasil Test</h2>
+            <hr className="mb-6" />
+            <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+              <div className="font-semibold text-gray-700">User</div>
+              <div className="text-gray-900">{selectedResult.user?.name} ({selectedResult.user?.email})</div>
+              <div className="font-semibold text-gray-700">Test</div>
+              <div className="text-gray-900">{selectedResult.test?.title}</div>
+              <div className="font-semibold text-gray-700">Attempt</div>
+              <div className="text-gray-900">#{selectedResult.attempt_number}</div>
+              <div className="font-semibold text-gray-700">Score</div>
+              <div className="text-gray-900">{selectedResult.score || 0}%</div>
+              <div className="font-semibold text-gray-700">Status</div>
+              <div className="text-gray-900 capitalize">{selectedResult.status}</div>
+              <div className="font-semibold text-gray-700">Started</div>
+              <div className="text-gray-900">{formatDate(selectedResult.started_at)}</div>
+              <div className="font-semibold text-gray-700">Completed</div>
+              <div className="text-gray-900">{selectedResult.completed_at ? formatDate(selectedResult.completed_at) : '-'}</div>
+            </div>
+            <h3 className="text-lg font-semibold text-blue-800 mb-3">Jawaban Detail</h3>
+            <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
+              {selectedResult.test_answers && selectedResult.test_answers.length > 0 ? (
+                selectedResult.test_answers.map((answer, index) => (
+                  <div key={answer.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div className="font-semibold text-gray-700 mb-1">Soal {index + 1}: {answer.question?.question_text}</div>
+                    <div className="text-gray-900 mb-1">Jawaban: {answer.answer || 'Tidak dijawab'}</div>
+                    <div>
+                      <span className="font-bold text-black">Status:</span>{' '}
+                      {answer.is_correct === true ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-600 text-white shadow">
+                          ✓ Benar
+                        </span>
+                      ) : answer.is_correct === false ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-600 text-white shadow">
+                          ✗ Salah
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-400 text-white shadow">
+                          ? Perlu penilaian manual
+                        </span>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
-
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  onClick={() => setShowDetail(false)}
-                  className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-                >
-                  Tutup
-                </button>
-              </div>
+                ))
+              ) : (
+                <div className="text-gray-500">Tidak ada jawaban.</div>
+              )}
             </div>
           </div>
         </div>

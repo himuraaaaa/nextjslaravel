@@ -75,8 +75,79 @@ const Login = () => {
   const closeModal = () => setModalMessage('');
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(to bottom, #001F5A 0%, #274690 100%)' }}>
-      {/* Modal Pop-up */}
+    <div className="min-h-screen flex">
+      {/* Kiri: Gambar Saja */}
+      <div
+        className="flex-1 h-screen"
+        style={{
+          backgroundImage: "url('/gedung-kansai.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '500px'
+        }}
+      ></div>
+      {/* Kanan: Form Login langsung di atas background putih */}
+      <div className="flex-1 flex flex-col justify-center items-center bg-white">
+        <div className="w-full max-w-md px-8">
+          <div className="flex items-center gap-3 mb-6">
+            <img src="/logo-login.png" alt="Logo" className="h-10 w-10 object-contain" />
+            <span className="h-8 border-l-2 border-gray-300"></span>
+            <span className="text-3xl font-bold" style={{ color: '#001F5A' }}>Login</span>
+          </div>
+          <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="email" className="block text-gray-700 text-sm mb-1">Email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border border-gray-300 focus:border-blue-700 outline-none bg-blue-50 py-3 px-4 text-gray-900 placeholder-gray-400 rounded transition"
+                placeholder=""
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-gray-700 text-sm mb-1">Password</label>
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border border-gray-300 focus:border-blue-700 outline-none bg-blue-50 py-3 px-4 text-gray-900 placeholder-gray-400 rounded transition"
+                placeholder=""
+              />
+              <div className="flex items-center mt-2">
+                <input
+                  id="show-password"
+                  type="checkbox"
+                  checked={showPassword}
+                  onChange={() => setShowPassword((v) => !v)}
+                  className="mr-2 accent-[#001F5A]"
+                />
+                <label htmlFor="show-password" className="text-xs text-[#001F5A] select-none cursor-pointer">Show password</label>
+              </div>
+            </div>
+            <div className="flex justify-center mt-2 mb-2">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                onChange={setRecaptchaToken}
+              />
+            </div>
+            {error && (
+              <div className="rounded bg-red-50 text-red-700 text-sm px-3 py-2 text-center">{error}</div>
+            )}
+            <button type="submit" className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded transition" disabled={loading}>{loading ? 'Loading...' : 'Login'}</button>
+          </form>
+        </div>
+      </div>
+      {/* Modal Pop-up tetap di luar */}
       {modalMessage && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: '#fff', borderRadius: 12, padding: 32, minWidth: 280, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', textAlign: 'center' }}>
@@ -85,63 +156,6 @@ const Login = () => {
           </div>
         </div>
       )}
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm flex flex-col items-center">
-        <img src="/logo-login.png" alt="Logo" className="max-w-[120px] mb-4 mx-auto" />
-        <h2 className="text-2xl font-semibold tracking-widest text-center text-[#001F5A] mb-6 border-b border-blue-100 pb-2">LOGIN</h2>
-        <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email" className="block text-gray-700 text-sm mb-1">Email</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border-b border-[#001F5A] focus:border-[#001F5A] outline-none bg-transparent py-2 px-0 text-gray-900 placeholder-gray-400 transition"
-              placeholder=""
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-gray-700 text-sm mb-1">Password</label>
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border-b border-[#001F5A] focus:border-[#001F5A] outline-none bg-blue-50 py-2 px-3 text-gray-900 placeholder-gray-400 transition h-11"
-              placeholder=""
-              style={{ minHeight: '44px' }}
-            />
-            <div className="flex items-center mt-2">
-              <input
-                id="show-password"
-                type="checkbox"
-                checked={showPassword}
-                onChange={() => setShowPassword((v) => !v)}
-                className="mr-2 accent-[#001F5A]"
-              />
-              <label htmlFor="show-password" className="text-xs text-[#001F5A] select-none cursor-pointer">Show password</label>
-            </div>
-          </div>
-          <div className="flex justify-center mt-2 mb-2">
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-              onChange={setRecaptchaToken}
-            />
-          </div>
-          {error && (
-            <div className="rounded bg-red-50 text-red-700 text-sm px-3 py-2 text-center">{error}</div>
-          )}
-          <button type="submit" className="btn-primary w-full" disabled={loading}>{loading ? 'Loading...' : 'Login'}</button>
-        </form>
-      </div>
-      {/* Hapus copyright di bawah */}
     </div>
   );
 };

@@ -68,7 +68,6 @@ const Navbar = () => {
             {isAdmin && (
               <>
                 <Link href="/admin/test_list" className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${router.pathname === '/admin/test_list' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`}><FileText className="h-4 w-4" /><span>Tests</span></Link>
-                <Link href="/admin/question_list" className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${router.pathname === '/admin/question_list' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`}><Plus className="h-4 w-4" /><span>Questions</span></Link>
                 <Link href="/admin/test-results" className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${router.pathname === '/admin/test-results' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`}><BarChart3 className="h-4 w-4" /><span>Results</span></Link>
                 <Link href="/admin/user_list" className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${router.pathname === '/admin/user_list' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`}><Users className="h-4 w-4" /><span>Users</span></Link>
                 <Link href="/admin/user-attempts" className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${router.pathname === '/admin/user-attempts' ? 'bg-blue-100 text-blue-700' : 'text-white hover:text-blue-200 hover:bg-white hover:bg-opacity-10'}`}><RefreshCw className="h-4 w-4" /><span>Attempts</span></Link>
@@ -89,19 +88,23 @@ const Navbar = () => {
                 {getInitials(user.name)}
               </button>
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-2 z-50 animate-fade-in" style={{minWidth:180, background:'#001F5A'}}>
-                  <div className="px-4 py-2 font-semibold text-base border-b" style={{color:'#fff', borderColor:'rgba(255,255,255,0.2)'}}>{user.name}</div>
-              {isAdmin && (
-                    <div className="px-4 py-1 text-xs bg-white text-[#001F5A] rounded-full inline-block mx-4 my-2 font-bold">Admin</div>
-                  )}
+                <div className="absolute right-0 mt-2 w-64 rounded-xl shadow-lg border border-gray-100 bg-white py-4 z-50 animate-fade-in">
+                  <div className="flex flex-col items-center mb-3">
+                    <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-2xl font-bold mb-2 shadow">
+                      {getInitials(user.name)}
+                    </div>
+                    <div className="font-semibold text-gray-900 text-lg">{user.name}</div>
+                    {isAdmin && (
+                      <span className="mt-1 px-3 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">Admin</span>
+                    )}
+                  </div>
+                  <hr className="my-2" />
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 flex items-center gap-2 rounded-md"
-                    style={{color:'#001F5A', background:'#fff', fontWeight:'bold', marginTop:8, transition:'background 0.2s'}}
-                    onMouseOver={e => e.currentTarget.style.background='#e0e7ff'}
-                    onMouseOut={e => e.currentTarget.style.background='#fff'}
+                    className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-blue-900 font-semibold hover:bg-blue-50 transition"
                   >
-                    <LogOut className="h-4 w-4" /> Logout
+                    <LogOut className="h-5 w-5" />
+                    Logout
                   </button>
                 </div>
               )}

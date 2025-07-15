@@ -17,6 +17,7 @@ const TestEdit = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [type, setType] = useState('general');
 
   useEffect(() => {
     if (test_id) {
@@ -27,6 +28,7 @@ const TestEdit = () => {
         setDuration(test.duration || 60);
         setAllowedAttempts(test.allowed_attempts !== undefined ? test.allowed_attempts : 1);
         setCode(test.code || '');
+        setType(test.type || 'general');
         setLoading(false);
       }).catch(() => setLoading(false));
     }
@@ -43,7 +45,8 @@ const TestEdit = () => {
         status, 
         duration, 
         allowed_attempts: Number(allowed_attempts),
-        code
+        code,
+        type // tambahkan type
       });
       router.push('/admin/test_list');
     } catch (err) {
@@ -93,6 +96,16 @@ const TestEdit = () => {
           <label className="block mb-1 text-gray-900">Kesempatan Mengerjakan</label>
           <input type="number" min="0" value={allowed_attempts} onChange={e => setAllowedAttempts(e.target.value)} required className="w-full border px-3 py-2 rounded text-gray-900" />
           <p className="text-sm text-gray-500 mt-1">Isi 0 untuk kesempatan tak terbatas.</p>
+        </div>
+        <div>
+          <label className="block mb-1 text-gray-900">Tipe Test</label>
+          <select 
+            value={type} 
+            onChange={e => setType(e.target.value)} 
+            className="w-full border px-3 py-2 rounded text-gray-900"
+          >
+            <option value="general">General</option>
+          </select>
         </div>
         
         {/* Test Code Section */}

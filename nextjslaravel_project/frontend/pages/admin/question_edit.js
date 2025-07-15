@@ -5,6 +5,7 @@ import { useAdminQuestions } from '@/hooks/useAdminQuestions';
 import Link from 'next/link';
 import { Save, ArrowLeft, FileText, AlertCircle, Plus, Trash2, UploadCloud } from 'lucide-react';
 import api from '@/utils/api';
+import DiscQuestionForm from '@/components/DiscQuestionForm';
 
 const QuestionEdit = () => {
   const router = useRouter();
@@ -18,6 +19,7 @@ const QuestionEdit = () => {
   const [points, setPoints] = useState(1);
   const [options, setOptions] = useState([]);
   const [correctAnswer, setCorrectAnswer] = useState('');
+  const [testType, setTestType] = useState('general');
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -45,6 +47,18 @@ const QuestionEdit = () => {
         });
     }
   }, [user, router, question_id]);
+
+  useEffect(() => {
+    if (test_id) {
+      api.get(`/admin/tests/${test_id}`)
+        .then(res => setTestType(res.data.type || 'general'))
+        .catch(() => setTestType('general'));
+    }
+  }, [test_id]);
+
+  useEffect(() => {
+    if (testType === 'disc') setQuestionType('disc');
+  }, [testType]);
 
   const handleTypeChange = (e) => {
     const newType = e.target.value;
@@ -246,12 +260,11 @@ const QuestionEdit = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Question Type */}
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Tipe Soal *</label>
+                <label className="block text-sm font-medium mb-1 text-black">Tipe Soal *</label>
                 <select
+                  className="w-full border border-gray-300 rounded px-3 py-2 mb-4 text-black"
                   value={questionType}
                   onChange={handleTypeChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="multiple_choice">Pilihan Ganda</option>
                   <option value="true_false">Benar/Salah</option>

@@ -20,6 +20,9 @@
     </style>
 </head>
 <body>
+    <div style="text-align:center; margin-bottom: 24px;">
+        <img src="{{ asset('image.png') }}" alt="Kansai Paint" style="max-width:180px; margin: 0 auto;" />
+    </div>
     <h2>Psychotest Invitation</h2>
     <div class="bilingual">
         <strong>Congratulations! Your qualifications meet our requirements</strong><br>

@@ -208,7 +208,7 @@ class TestExecutionController extends Controller
         $request->validate([
             'attempt_id' => 'required|integer|exists:test_attempts,id',
             'question_id' => 'required|integer|exists:questions,id',
-            'answer' => 'nullable|string',
+            'answer' => 'nullable', // bisa string (general) atau array (DISC)
             'question_index' => 'nullable|integer',
         ]);
 
@@ -226,8 +226,8 @@ class TestExecutionController extends Controller
             ->where('test_id', $test->id)
             ->firstOrFail();
 
-        // Update or create the answer
-        $testAnswer = TestAnswer::updateOrCreate(
+        // General
+        TestAnswer::updateOrCreate(
             [
                 'attempt_id' => $testAttempt->id,
                 'question_id' => $question->id,
@@ -247,7 +247,7 @@ class TestExecutionController extends Controller
 
         return response()->json([
             'message' => 'Answer saved successfully.',
-            'answer_id' => $testAnswer->id
+            'answer_id' => TestAnswer::where('attempt_id', $testAttempt->id)->where('question_id', $question->id)->first()->id
         ]);
     }
 
@@ -266,7 +266,6 @@ class TestExecutionController extends Controller
         $request->validate([
             'attempt_id' => 'required|integer|exists:test_attempts,id',
             'answers' => 'required|array',
-            'answers.*' => 'nullable|string'
         ]);
 
         $user = Auth::user();
@@ -318,7 +317,7 @@ class TestExecutionController extends Controller
         ]);
         
         try {
-            DB::transaction(function () use ($testAttempt, $questions, $request) {
+            DB::transaction(function () use ($testAttempt, $questions, $request, $test, $user) {
                 $correctCount = 0;
                 $totalQuestions = $questions->count();
 
@@ -356,9 +355,9 @@ class TestExecutionController extends Controller
 
                 \Log::info('Test submission completed', [
                     'attempt_id' => $testAttempt->id,
-                    'score' => $score,
-                    'correct_count' => $correctCount,
-                    'total_questions' => $totalQuestions
+                    'score' => $testAttempt->score,
+                    'correct_count' => $testAttempt->score, // Assuming score is correct_count for non-DISC
+                    'total_questions' => $questions->count()
                 ]);
             });
 
@@ -424,13 +423,13 @@ class TestExecutionController extends Controller
     public function attemptResult($attemptId)
     {
         $user = Auth::user();
-        
         $attempt = TestAttempt::with(['test', 'testAnswers.question'])
             ->where('id', $attemptId)
             ->where('user_id', $user->id)
             ->firstOrFail();
-
-        return response()->json($attempt);
+        return response()->json([
+            'attempt' => $attempt,
+        ]);
     }
 
     /**

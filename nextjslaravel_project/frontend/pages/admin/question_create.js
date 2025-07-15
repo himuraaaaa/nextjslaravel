@@ -12,6 +12,7 @@ const QuestionCreate = () => {
   const { user } = useAuth();
   const { createQuestion } = useAdminQuestions();
 
+  // Semua useState di sini
   const [questionText, setQuestionText] = useState('');
   const [questionImageUrl, setQuestionImageUrl] = useState('');
   const [questionType, setQuestionType] = useState('multiple_choice');
@@ -20,15 +21,37 @@ const QuestionCreate = () => {
     { text: '' }, { text: '' }, { text: '' }, { text: '' }
   ]);
   const [correctAnswer, setCorrectAnswer] = useState('');
-  
+  const [testType, setTestType] = useState('general');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [uploading, setUploading] = useState(false);
+
 
   useEffect(() => {
     if (!user) router.push('/login');
     else if (user.role !== 'admin') router.push('/dashboard');
   }, [user, router]);
+
+  useEffect(() => {
+    console.log('router.query:', router.query, 'test_id:', test_id);
+  }, [router.query, test_id]);
+
+  useEffect(() => {
+    console.log('useEffect | test_id:', test_id);
+    if (test_id) {
+      api.get(`/admin/tests/${test_id}`)
+        .then(res => {
+          console.log('FETCHED testType:', res.data.type);
+          setTestType(res.data.type || 'general');
+        })
+        .catch(() => setTestType('general'));
+    }
+  }, [test_id]);
+
+  useEffect(() => {
+    if (testType === 'disc') setQuestionType('disc');
+  }, [testType]);
+
 
   const handleTypeChange = (e) => {
     const newType = e.target.value;
@@ -149,8 +172,6 @@ const QuestionCreate = () => {
       setSaving(false);
     }
   };
-
-  if (!user || user.role !== 'admin') return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
