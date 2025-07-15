@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import api from '@/utils/api';
 import { useAdminTests } from '@/hooks/useAdminTests';
 import AdminCameraMonitor from '@/components/AdminCameraMonitor';
+// Hapus import Layout from '@/components/Layout';
 
 export default function AdminTestReview() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function AdminTestReview() {
   }, [selectedTest]);
 
   return (
-    <div className="min-h-screen bg-[#F7F9FB] py-10">
+    <div className="min-h-screen py-10">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#001F5A] mb-2">Review Soal Test</h1>

@@ -28,6 +28,7 @@ const Dashboard = () => {
   const activeTests = tests.filter(test => test.status === 'active');
   const totalPages = Math.ceil(activeTests.length / testsPerPage);
   const paginatedTests = activeTests.slice((currentPage - 1) * testsPerPage, currentPage * testsPerPage);
+  const [agreeChecked, setAgreeChecked] = useState(false);
 
   useEffect(() => {
     setShowAssessmentNote(true);
@@ -70,6 +71,10 @@ const Dashboard = () => {
   const validateAndStartTest = async () => {
     if (!selectedTest || !testCode.trim()) {
       setCodeError('Kode test harus diisi');
+      return;
+    }
+    if (!agreeChecked) {
+      setCodeError('Anda harus menyetujui instruksi dan note sebelum memulai test');
       return;
     }
 
@@ -282,11 +287,11 @@ const Dashboard = () => {
 
         {/* Code Input Modal */}
         {showCodeModal && selectedTest && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+            <div className="relative w-full max-w-2xl mx-auto p-0">
+              <div className="bg-white rounded-2xl shadow-2xl px-10 py-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-xl font-bold text-gray-900">
                     Masukkan Kode Test
                   </h3>
                   <button
@@ -295,55 +300,102 @@ const Dashboard = () => {
                       setSelectedTest(null);
                       setTestCode('');
                       setCodeError('');
+                      setAgreeChecked(false);
                     }}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
                   >
-                    ✕
+                    ×
                   </button>
                 </div>
-                
-                <div className="mb-4">
-                  <h4 className="font-medium text-gray-900 mb-2">
-                    {selectedTest.title}
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Test ini memerlukan kode untuk diakses. Silakan masukkan kode yang telah diberikan oleh admin.
-                  </p>
-                  
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kode Test
-                    </label>
-                    <input
-                      type="text"
-                      value={testCode}
-                      onChange={(e) => setTestCode(e.target.value)}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="Masukkan kode test..."
-                      autoFocus
-                    />
-                    {codeError && (
-                      <p className="text-red-600 text-sm mt-1">{codeError}</p>
-                    )}
+                <h4 className="font-bold text-gray-900 mb-2 text-lg text-center">
+                  {selectedTest.title}
+                </h4>
+                {/* Kotak scrollable untuk instruksi dan note */}
+                <div className="mb-4 pb-4">
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-56 overflow-y-auto">
+                    {/* INSTRUKSI INDONESIA */}
+                    <div className="mb-4 pb-4 border-b border-gray-200">
+                      <div className="font-bold text-blue-900 text-base mb-1">Instruksi:</div>
+                      <ul className="list-none ml-0 mb-2 space-y-1">
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-blue-500 inline-block"></span>Setiap soal terdapat gambar yang kurang lengkap, anda diminta untuk melengkapi gambar mana yang paling cocok untuk menutupi kekurangan tersebut</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-blue-500 inline-block"></span>Setiap soal terdapat beberapa pilihan jawaban</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-blue-500 inline-block"></span>Pilihlah salah satu jawaban yang menurut anda cocok</li>
+                      </ul>
+                      <div className="font-bold text-red-800 text-base mb-1 mt-3">Note:</div>
+                      <ul className="list-none ml-0 mb-2 space-y-1">
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-red-500 inline-block"></span>Soal ini akan merekam akses Kamera dan Microphone anda secara live, adanya kecurangan akan terdeteksi</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-red-500 inline-block"></span>Soal hanya dapat diisi satu kali</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-red-500 inline-block"></span>Soal ini terdapat durasi waktu terbatas</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-red-500 inline-block"></span>Dilarang keras untuk menyebar luaskan soal psikotest</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-red-500 inline-block"></span>Pengisian soal psikotest wajib dikerjakan sendiri tanpa bantuan orang lain</li>
+                      </ul>
+                    </div>
+                    {/* INSTRUKSI ENGLISH */}
+                    <div className="mb-2">
+                      <div className="font-bold text-blue-900 text-base mb-1">Instructions:</div>
+                      <ul className="list-none ml-0 mb-2 space-y-1">
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-blue-500 inline-block"></span>Every question has uncompleted picture, you requested to complete the matched picture</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-blue-500 inline-block"></span>Every question has few answer options</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-blue-500 inline-block"></span>Choose only one matched picture</li>
+                      </ul>
+                      <div className="font-bold text-red-800 text-base mb-1 mt-3">Note:</div>
+                      <ul className="list-none ml-0 mb-2 space-y-1">
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-red-500 inline-block"></span>This website will record your Camera and Microphone access live, any fraud will be detected</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-red-500 inline-block"></span>Assessment only able to be accessed once</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-red-500 inline-block"></span>Assessment has limited duration</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-red-500 inline-block"></span>We highly prohibit you to share the assessment</li>
+                        <li className="flex items-start gap-2 text-gray-900 font-semibold"><span className="mt-1 w-2 h-2 rounded-full bg-red-500 inline-block"></span>Assessment should be done by yourself without any other people help</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
-
-                <div className="flex justify-end space-x-3">
+                <p className="text-sm text-gray-600 mb-4 text-center">
+                  Test ini memerlukan kode untuk diakses. Silakan masukkan kode yang telah diberikan oleh admin.
+                </p>
+                <div className="mb-4">
+                  <label className="block text-base font-semibold text-gray-700 mb-2">
+                    Kode Test
+                  </label>
+                  <input
+                    type="text"
+                    value={testCode}
+                    onChange={(e) => setTestCode(e.target.value)}
+                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    placeholder="Masukkan kode test..."
+                    autoFocus
+                  />
+                  {codeError && (
+                    <p className="text-red-600 text-sm mt-1 font-semibold">{codeError}</p>
+                  )}
+                </div>
+                <div className="flex items-center mb-6">
+                  <input
+                    type="checkbox"
+                    id="agree-check"
+                    checked={agreeChecked}
+                    onChange={e => setAgreeChecked(e.target.checked)}
+                    className="mr-3 accent-indigo-600 h-5 w-5"
+                    required
+                  />
+                  <label htmlFor="agree-check" className={`text-base font-semibold select-none ${!agreeChecked && codeError ? 'text-red-600' : 'text-gray-700'}`}>Saya mengerti dan setuju dengan instruksi dan note di atas</label>
+                </div>
+                <div className="flex justify-end space-x-3 mt-2">
                   <button
                     onClick={() => {
                       setShowCodeModal(false);
                       setSelectedTest(null);
                       setTestCode('');
                       setCodeError('');
+                      setAgreeChecked(false);
                     }}
-                    className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                    className="bg-gray-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-gray-700"
                   >
                     Batal
                   </button>
                   <button
                     onClick={validateAndStartTest}
-                    disabled={validatingCode || !testCode.trim()}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={validatingCode || !testCode.trim() || !agreeChecked}
+                    className="bg-indigo-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow"
                   >
                     {validatingCode ? 'Memvalidasi...' : 'Mulai Test'}
                   </button>

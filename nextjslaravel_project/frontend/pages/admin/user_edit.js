@@ -60,7 +60,7 @@ export default function UserEdit() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center">
           <Link href={`/admin/user_detail?id=${id}`} className="mr-4 text-blue-600">Kembali ke Detail</Link>
