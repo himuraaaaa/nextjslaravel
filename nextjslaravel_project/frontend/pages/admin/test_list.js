@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminTests } from '@/hooks/useAdminTests';
 import Link from 'next/link';
-import { Plus, Edit, Eye, Clock, Key, EyeOff, Trash2, CheckSquare, Square, Check, XCircle, Loader2 } from 'lucide-react';
+import { Plus, Edit, Eye, Clock, Key, EyeOff, Trash2, CheckSquare, Square, Check, XCircle, Loader2, Search } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { useState } from 'react';
 import { useRef } from 'react';
@@ -16,6 +16,9 @@ const TestList = () => {
   const [selectedTests, setSelectedTests] = useState([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const deleteBtnRef = useRef();
+  const [search, setSearch] = useState('');
+  const [entriesPerPage, setEntriesPerPage] = useState(10); // default 10
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Select all handler
   const allSelected = tests.length > 0 && selectedTests.length === tests.length;
@@ -74,6 +77,24 @@ const TestList = () => {
     }
   };
 
+  // Filtered tests by search
+  const filteredTests = tests.filter(test =>
+    test.title?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Pagination logic
+  const totalEntries = filteredTests.length;
+  const totalPages = Math.ceil(totalEntries / entriesPerPage);
+  const paginatedTests = filteredTests.slice(
+    (currentPage - 1) * entriesPerPage,
+    (currentPage - 1) * entriesPerPage + entriesPerPage
+  );
+
+  useEffect(() => {
+    // Reset to page 1 if search or entriesPerPage changes
+    setCurrentPage(1);
+  }, [search, entriesPerPage]);
+
   if (!user || user.role !== 'admin') return null;
   if (loading) return (
     <div className="flex items-center justify-center min-h-[40vh]">
@@ -99,6 +120,34 @@ const TestList = () => {
       </PageHeader>
 
       <div className="px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Bar & Show Entries */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 max-w-2xl justify-between">
+          <div className="relative w-full sm:max-w-md">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <Search className="h-5 w-5" />
+            </span>
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Cari judul test..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-base bg-white shadow-sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-700">Tampilkan</span>
+            <select
+              className="border rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+              value={entriesPerPage}
+              onChange={e => setEntriesPerPage(Number(e.target.value))}
+            >
+              {[5, 10, 25, 50, 100].map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <span className="text-sm text-gray-700">entri</span>
+          </div>
+        </div>
         {/* Bulk Action Bar */}
         <div className="mb-6">
           <div className="bg-white/80 shadow rounded-xl flex flex-wrap gap-3 items-center px-6 py-4 border border-gray-100">
@@ -157,7 +206,7 @@ const TestList = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
-                {tests.map(test => (
+                {paginatedTests.map(test => (
                   <tr key={test.id} className="hover:bg-blue-50 transition-all">
                     <td className="px-4 py-4 text-center">
                       <input
@@ -280,15 +329,48 @@ const TestList = () => {
                     </td>
                   </tr>
                 ))}
-                {tests.length === 0 && (
+                {paginatedTests.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="text-center text-gray-400 py-12 text-lg">Belum ada test yang tersedia.</td>
+                    <td colSpan={8} className="text-center text-gray-400 py-12 text-lg">Tidak ada test yang cocok dengan pencarian.</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-between items-center mt-6 px-2">
+            <span className="text-sm text-gray-600">
+              Menampilkan {(totalEntries === 0) ? 0 : ((currentPage - 1) * entriesPerPage + 1)} - {Math.min(currentPage * entriesPerPage, totalEntries)} dari {totalEntries} entri
+            </span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded-l-lg border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 disabled:opacity-50"
+              >
+                Sebelumnya
+              </button>
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 border border-gray-300 ${currentPage === i + 1 ? 'bg-blue-600 text-white font-bold' : 'bg-white text-gray-700 hover:bg-blue-50'}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded-r-lg border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 disabled:opacity-50"
+              >
+                Berikutnya
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

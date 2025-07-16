@@ -14,6 +14,8 @@ const QuestionList = () => {
   const { questions, loading, error, fetchQuestions, deleteQuestion } = useAdminQuestions();
   const [testType, setTestType] = useState('general');
   const [testTitle, setTestTitle] = useState('');
+  const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (!user) {
@@ -40,6 +42,18 @@ const QuestionList = () => {
   // Filter questions by test_id
   const filteredQuestions = questions.filter(q => String(q.test_id) === String(test_id));
 
+  // Pagination logic
+  const totalEntries = filteredQuestions.length;
+  const totalPages = Math.ceil(totalEntries / entriesPerPage);
+  const paginatedQuestions = filteredQuestions.slice(
+    (currentPage - 1) * entriesPerPage,
+    (currentPage - 1) * entriesPerPage + entriesPerPage
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [entriesPerPage, test_id]);
+
   const handleDelete = async (questionId) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus soal ini?')) {
       try {
@@ -63,6 +77,23 @@ const QuestionList = () => {
 
       <div className="px-4 sm:px-6 lg:px-8 py-8">
         {error && <div className="text-red-600 mb-4">{error}</div>}
+        {/* Show Entries Dropdown */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 max-w-2xl justify-between mb-4">
+          <div></div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-700">Tampilkan</span>
+            <select
+              className="border rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+              value={entriesPerPage}
+              onChange={e => setEntriesPerPage(Number(e.target.value))}
+            >
+              {[5, 10, 25, 50, 100].map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <span className="text-sm text-gray-700">entri</span>
+          </div>
+        </div>
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -79,7 +110,7 @@ const QuestionList = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredQuestions.map(q => (
+              {paginatedQuestions.map(q => (
                 <tr key={q.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-900">
                     <div className="max-w-md truncate" title={q.question_text}>
@@ -118,9 +149,47 @@ const QuestionList = () => {
                   </td>
                 </tr>
               ))}
+              {paginatedQuestions.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="text-center text-gray-400 py-12 text-lg">Tidak ada soal.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-between items-center mt-6 px-2">
+            <span className="text-sm text-gray-600">
+              Menampilkan {(totalEntries === 0) ? 0 : ((currentPage - 1) * entriesPerPage + 1)} - {Math.min(currentPage * entriesPerPage, totalEntries)} dari {totalEntries} entri
+            </span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded-l-lg border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 disabled:opacity-50"
+              >
+                Sebelumnya
+              </button>
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 border border-gray-300 ${currentPage === i + 1 ? 'bg-blue-600 text-white font-bold' : 'bg-white text-gray-700 hover:bg-blue-50'}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded-r-lg border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 disabled:opacity-50"
+              >
+                Berikutnya
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -11,11 +11,17 @@ export default function UserAttempts() {
     const [userAttempts, setUserAttempts] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [entriesPerPage, setEntriesPerPage] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         fetchUsers();
         fetchTests();
     }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [entriesPerPage, userAttempts]);
 
     const fetchUsers = async () => {
         try {
@@ -100,6 +106,14 @@ export default function UserAttempts() {
             setLoading(false);
         }
     };
+
+    const attempts = userAttempts?.attempts || [];
+    const totalEntries = attempts.length;
+    const totalPages = Math.ceil(totalEntries / entriesPerPage);
+    const paginatedAttempts = attempts.slice(
+        (currentPage - 1) * entriesPerPage,
+        (currentPage - 1) * entriesPerPage + entriesPerPage
+    );
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -186,61 +200,118 @@ export default function UserAttempts() {
                     {/* Attempts List */}
                     <div className="mb-6">
                         <h3 className="text-lg font-semibold mb-3 text-gray-800">Attempt History</h3>
-                        {userAttempts.attempts.length === 0 ? (
+                        {attempts.length === 0 ? (
                             <p className="text-gray-500">No attempts found.</p>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full bg-white border border-gray-400">
-                                    <thead>
-                                        <tr className="bg-gray-800 text-white">
-                                            <th className="px-4 py-2 border border-gray-400">Attempt #</th>
-                                            <th className="px-4 py-2 border border-gray-400">Status</th>
-                                            <th className="px-4 py-2 border border-gray-400">Score</th>
-                                            <th className="px-4 py-2 border border-gray-400">Started</th>
-                                            <th className="px-4 py-2 border border-gray-400">Completed</th>
-                                            <th className="px-4 py-2 border border-gray-400">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {userAttempts.attempts.map((attempt, idx) => (
-                                            <tr key={attempt.id} className={idx % 2 === 0 ? 'bg-gray-100' : 'bg-white'}>
-                                                <td className="px-4 py-2 border border-gray-300 text-gray-900">{idx + 1}</td>
-                                                <td className="px-4 py-2 border border-gray-300 text-gray-900">{attempt.status}</td>
-                                                <td className="px-4 py-2 border border-gray-300 text-gray-900">{attempt.score ?? '-'}</td>
-                                                <td className="px-4 py-2 border border-gray-300 text-gray-900">{attempt.started_at ? new Date(attempt.started_at).toLocaleString() : '-'}</td>
-                                                <td className="px-4 py-2 border border-gray-300 text-gray-900">{attempt.completed_at ? new Date(attempt.completed_at).toLocaleString() : '-'}</td>
-                                                <td className="px-4 py-2 border border-gray-300 text-gray-900">
-                            <div className="flex flex-wrap gap-2">
-                                <button
-                                    onClick={() => resetUserAttempts('all')}
-                                    disabled={loading || userAttempts.attempts.length === 0}
-                                    className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
-                                >
-                                    Reset All
-                                </button>
-                                <button
-                                    onClick={() => resetUserAttempts('completed')}
-                                    disabled={loading || userAttempts.attempts.filter(a => a.status === 'completed').length === 0}
-                                    className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-orange-700 disabled:opacity-50"
-                                >
-                                    Reset Completed
-                                </button>
-                                <button
-                                    onClick={() => resetUserAttempts('ongoing')}
-                                    disabled={loading || userAttempts.attempts.filter(a => a.status === 'started').length === 0}
-                                    className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-yellow-700 disabled:opacity-50"
-                                >
-                                    Reset Ongoing
-                                </button>
-                            </div>
-                                                </td>
+                            <>
+                                {/* Show Entries Dropdown */}
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-3 max-w-2xl justify-between mb-4">
+                                    <div></div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-gray-700">Tampilkan</span>
+                                        <select
+                                            className="border rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+                                            value={entriesPerPage}
+                                            onChange={e => setEntriesPerPage(Number(e.target.value))}
+                                        >
+                                            {[5, 10, 25, 50, 100].map(opt => (
+                                                <option key={opt} value={opt}>{opt}</option>
+                                            ))}
+                                        </select>
+                                        <span className="text-sm text-gray-700">entri</span>
+                                    </div>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full bg-white border border-gray-400">
+                                        <thead>
+                                            <tr className="bg-gray-800 text-white">
+                                                <th className="px-4 py-2 border border-gray-400">Attempt #</th>
+                                                <th className="px-4 py-2 border border-gray-400">Status</th>
+                                                <th className="px-4 py-2 border border-gray-400">Score</th>
+                                                <th className="px-4 py-2 border border-gray-400">Started</th>
+                                                <th className="px-4 py-2 border border-gray-400">Completed</th>
+                                                <th className="px-4 py-2 border border-gray-400">Actions</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody>
+                                            {paginatedAttempts.map((attempt, idx) => (
+                                                <tr key={attempt.id} className={((currentPage - 1) * entriesPerPage + idx) % 2 === 0 ? 'bg-gray-100' : 'bg-white'}>
+                                                    <td className="px-4 py-2 border border-gray-300 text-gray-900">{(currentPage - 1) * entriesPerPage + idx + 1}</td>
+                                                    <td className="px-4 py-2 border border-gray-300 text-gray-900">{attempt.status}</td>
+                                                    <td className="px-4 py-2 border border-gray-300 text-gray-900">{attempt.score ?? '-'}</td>
+                                                    <td className="px-4 py-2 border border-gray-300 text-gray-900">{attempt.started_at ? new Date(attempt.started_at).toLocaleString() : '-'}</td>
+                                                    <td className="px-4 py-2 border border-gray-300 text-gray-900">{attempt.completed_at ? new Date(attempt.completed_at).toLocaleString() : '-'}</td>
+                                                    <td className="px-4 py-2 border border-gray-300 text-gray-900">
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <button
+                                                                onClick={() => resetUserAttempts('all')}
+                                                                disabled={loading || userAttempts.attempts.length === 0}
+                                                                className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
+                                                            >
+                                                                Reset All
+                                                            </button>
+                                                            <button
+                                                                onClick={() => resetUserAttempts('completed')}
+                                                                disabled={loading || userAttempts.attempts.filter(a => a.status === 'completed').length === 0}
+                                                                className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-orange-700 disabled:opacity-50"
+                                                            >
+                                                                Reset Completed
+                                                            </button>
+                                                            <button
+                                                                onClick={() => resetUserAttempts('ongoing')}
+                                                                disabled={loading || userAttempts.attempts.filter(a => a.status === 'started').length === 0}
+                                                                className="btn-accent px-3 py-1 text-white rounded text-sm hover:bg-yellow-700 disabled:opacity-50"
+                                                            >
+                                                                Reset Ongoing
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {paginatedAttempts.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={6} className="text-center text-gray-400 py-12 text-lg">Tidak ada attempt.</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <div className="flex justify-between items-center mt-6 px-2">
+                                        <span className="text-sm text-gray-600">
+                                            Menampilkan {(totalEntries === 0) ? 0 : ((currentPage - 1) * entriesPerPage + 1)} - {Math.min(currentPage * entriesPerPage, totalEntries)} dari {totalEntries} entri
+                                        </span>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                                disabled={currentPage === 1}
+                                                className="px-3 py-1 rounded-l-lg border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 disabled:opacity-50"
+                                            >
+                                                Sebelumnya
+                                            </button>
+                                            {[...Array(totalPages)].map((_, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => setCurrentPage(i + 1)}
+                                                    className={`px-3 py-1 border border-gray-300 ${currentPage === i + 1 ? 'bg-blue-600 text-white font-bold' : 'bg-white text-gray-700 hover:bg-blue-50'}`}
+                                                >
+                                                    {i + 1}
+                                                </button>
+                                            ))}
+                                            <button
+                                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                                disabled={currentPage === totalPages}
+                                                className="px-3 py-1 rounded-r-lg border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 disabled:opacity-50"
+                                            >
+                                                Berikutnya
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
-                        </div>
+                    </div>
 
                     {/* Action Buttons */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
