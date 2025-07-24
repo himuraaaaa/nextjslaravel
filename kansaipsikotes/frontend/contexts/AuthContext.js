@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // Get CSRF cookie first (Laravel Sanctum)
       const csrfApi = axios.create({
-        baseURL: process.env.NEXT_PUBLIC_API_BASE,
+        baseURL: 'http://localhost:8000',
         withCredentials: true
       });
       await csrfApi.get('/sanctum/csrf-cookie');
