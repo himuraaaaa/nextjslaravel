@@ -22,8 +22,9 @@ use App\Http\Controllers\ChatController;
 |
 */
 
-Route::get('/', function () {
-    return response()->json(['message' => 'test berhasil terhubung']);
+// Test endpoint
+Route::get('/test', function () {
+    return response()->json(['message' => 'Backend is working!']);
 });
 
 Route::get('/user', function (Request $request) {
