@@ -10,7 +10,8 @@ const PORT = 8080;
 const io = new Server(PORT, {
   cors: {
     // Untuk produksi, ganti "*" dengan URL frontend Next.js Anda di Vercel untuk keamanan.
-    origin: "https://nextjslaravel-amg8.vercel.app",
+    // Contoh: origin: "https://nextjslaravel-ampg8.vercel.app"
+    origin: "https://nextjslaravel-ampg8.vercel.app",
     methods: ["GET", "POST"] // Pastikan metode yang diizinkan sesuai kebutuhan
   }
 });
