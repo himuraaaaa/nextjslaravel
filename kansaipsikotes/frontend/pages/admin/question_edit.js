@@ -5,6 +5,7 @@ import { useAdminQuestions } from '@/hooks/useAdminQuestions';
 import Link from 'next/link';
 import { Save, ArrowLeft, FileText, AlertCircle, Plus, Trash2, UploadCloud } from 'lucide-react';
 import api from '@/utils/api';
+import DiscQuestionForm from '@/components/DiscQuestionForm';
 
 const QuestionEdit = () => {
   const router = useRouter();
