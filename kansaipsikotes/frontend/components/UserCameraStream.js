@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 
-const SIGNALING_SERVER_URL = 'honest-eagerness-production.up.railway.app';
+const SIGNALING_SERVER_URL = 'http://localhost:3001';
 const SNAPSHOT_INTERVAL_MS = 3 * 60 * 1000; // 3 menit
 
 function UserCameraStream({ attemptId, questionIndex, questionId, userAnswer, ...props }) {
