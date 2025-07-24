@@ -5,13 +5,13 @@ const { Server } = require("socket.io");
 
 // Server Socket.IO harus mendengarkan di port yang disediakan oleh Railway
 // via variabel lingkungan PORT. Jika tidak ada (misalnya di lokal), fallback ke 3001.
-const PORT = 8080;
+const PORT = process.env.PORT || 3001;
 
 const io = new Server(PORT, {
   cors: {
     // Untuk produksi, ganti "*" dengan URL frontend Next.js Anda di Vercel untuk keamanan.
     // Contoh: origin: "https://nextjslaravel-ampg8.vercel.app"
-    origin: "https://nextjslaravel-ampg8.vercel.app",
+    origin: "*",
     methods: ["GET", "POST"] // Pastikan metode yang diizinkan sesuai kebutuhan
   }
 });

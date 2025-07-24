@@ -24,7 +24,7 @@ const Navbar = () => {
   useEffect(() => {
     if (!isAdmin) return;
     if (!socketRef.current) {
-      //socketRef.current = io('http://localhost:3001');
+      socketRef.current = io('http://localhost:3001');
       socketRef.current.emit('join-chat', { userId: 'admin' });
     }
     const handler = (msg) => {
