@@ -148,7 +148,7 @@ function UserCameraStream({ attemptId, questionIndex, questionId, userAnswer, ..
       const dataUrl = canvas.toDataURL('image/png');
       // Kirim ke backend
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await fetch('https://nextjslaravel-production.up.railway.app/api/upload-snapshot', {
+      const response = await fetch('http://localhost:8000/api/upload-snapshot', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
