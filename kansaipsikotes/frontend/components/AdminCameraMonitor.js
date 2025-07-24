@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 
-const SIGNALING_SERVER_URL = 'honest-eagerness-production.up.railway.app';
-const SNAPSHOT_UPLOAD_URL = 'nextjslaravel-production.up.railway.app/api/upload-snapshot'; // Ganti jika endpoint berbeda
+const SIGNALING_SERVER_URL = 'http://localhost:3001';
+const SNAPSHOT_UPLOAD_URL = 'http://localhost:8000/api/upload-snapshot'; // Ganti jika endpoint berbeda
 
 const USERS_PER_PAGE = 20;
 
