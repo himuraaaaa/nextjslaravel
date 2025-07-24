@@ -20,25 +20,6 @@ const Navbar = () => {
   const isAdmin = user.role === 'admin';
   const isAdminPage = router.pathname.startsWith('/admin');
 
-  // Notifikasi chat global untuk admin
-  useEffect(() => {
-    if (!isAdmin) return;
-    if (!socketRef.current) {
-      //socketRef.current = io('http://localhost:3001');
-      socketRef.current.emit('join-chat', { userId: 'admin' });
-    }
-    const handler = (msg) => {
-      // Hanya notif jika bukan di halaman chat dan pesan dari user
-      if (router.pathname !== '/admin/chat' && msg.from && msg.from !== 'admin') {
-        setNotif({ userId: msg.from, text: msg.text || msg.message });
-      }
-    };
-    socketRef.current.on('chat-message', handler);
-    return () => {
-      socketRef.current.off('chat-message', handler);
-    };
-  }, [isAdmin, router.pathname]);
-
   const handleLogout = () => {
     logout();
     router.push('/login');
