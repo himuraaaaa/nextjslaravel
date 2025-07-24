@@ -41,6 +41,9 @@ class Kernel extends HttpKernel
             ],
 
             'api' => [
+                // --- TAMBAHKAN BARIS INI UNTUK MENGIZINKAN CORS ---
+                \Fruitcake\Cors\HandleCors::class, 
+
                 \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
                 \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
                 \Illuminate\Routing\Middleware\SubstituteBindings::class,
